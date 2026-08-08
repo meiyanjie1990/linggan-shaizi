@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#FF6B6B">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>🎲 家庭灵感骰子</title>
+<style>
+/* ========== Reset & Base ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FFF5F0;
+  --bg-card: #FFFFFF;
+  --text: #2D2D2D;
+  --text-secondary: #8B7E74;
+  --accent-qianling: #FF8FA3;
+  --accent-lover: #D4A0C0;
+  --accent-verse: #C9A96E;
+  --accent-qianling-light: #FFF0F3;
+  --accent-lover-light: #FDF2F8;
+  --accent-verse-light: #FFF8EE;
+  --primary: #FF6B6B;
+  --primary-dark: #E55A5A;
+  --shadow: 0 2px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --safe-bottom: env(safe-area-inset-bottom, 16px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1A1A2E;
+    --bg-card: #252540;
+    --text: #E8E4E0;
+    --text-secondary: #9B9490;
+    --accent-qianling-light: #3D2030;
+    --accent-lover-light: #352538;
+    --accent-verse-light: #383020;
+    --shadow: 0 2px 16px rgba(0,0,0,0.20);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.30);
+  }
+}
+html { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  overflow: hidden;
+}
+.app {
+  width: 100%;
+  max-width: 420px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 20px 0;
+  position: relative;
+}
+
+/* ========== Header ========== */
+.header {
+  text-align: center;
+  padding: 12px 0 8px;
+  flex-shrink: 0;
+}
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, var(--primary), #FF8E53);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.header .date {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ========== Cards ========== */
+.cards {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: center;
+  padding: 8px 0;
+  overflow: hidden;
+}
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+}
+.card.qianling::before { background: var(--accent-qianling); }
+.card.qianling { background: linear-gradient(180deg, var(--accent-qianling-light) 0%, var(--bg-card) 40px); }
+.card.lover::before { background: var(--accent-lover); }
+.card.lover { background: linear-gradient(180deg, var(--accent-lover-light) 0%, var(--bg-card) 40px); }
+.card.verse::before { background: var(--accent-verse); }
+.card.verse { background: linear-gradient(180deg, var(--accent-verse-light) 0%, var(--bg-card) 40px); }
+
+.card.rolling {
+  animation: cardPulse 0.8s ease;
+}
+@keyframes cardPulse {
+  0% { transform: scale(1); }
+  15% { transform: scale(0.97); }
+  40% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.card.settled {
+  animation: cardSettle 0.4s ease;
+}
+@keyframes cardSettle {
+  0% { transform: scale(1.02); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+.card-icon {
+  font-size: 2rem;
+  margin-right: 14px;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.card.qianling .card-icon { background: var(--accent-qianling-light); }
+.card.lover .card-icon { background: var(--accent-lover-light); }
+.card.verse .card-icon { background: var(--accent-verse-light); }
+
+.card-content {
+  flex: 1;
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
+  word-break: break-word;
+}
+
+/* Lock button */
+.card-lock {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 2;
+}
+.card-lock:active { transform: scale(0.9); }
+.card-lock.locked { opacity: 1; }
+.card-lock.locked::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--text-secondary);
+  opacity: 0.3;
+}
+
+/* ========== Roll Button ========== */
+.roll-area {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0 calc(16px + var(--safe-bottom));
+}
+.roll-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.roll-btn:active {
+  transform: scale(0.9);
+  box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+}
+.roll-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.roll-hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.shake-icon {
+  display: inline-block;
+  animation: shakeHint 2s ease-in-out infinite;
+}
+@keyframes shakeHint {
+  0%, 100% { transform: rotate(0); }
+  10% { transform: rotate(-15deg); }
+  20% { transform: rotate(15deg); }
+  30% { transform: rotate(-10deg); }
+  40% { transform: rotate(10deg); }
+  50% { transform: rotate(0); }
+}
+
+/* ========== Bottom Nav ========== */
+.bottom-nav {
+  position: fixed;
+  bottom: var(--safe-bottom);
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: transform 0.15s, background 0.2s;
+}
+.nav-btn:active { transform: scale(0.9); }
+
+/* ========== Panel (Edit & History) ========== */
+.panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.panel {
+  background: var(--bg-card);
+  width: 100%;
+  max-width: 420px;
+  max-height: 75vh;
+  border-radius: 24px 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+  padding-bottom: var(--safe-bottom);
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.panel-header h3 { font-size: 1.1rem; }
+.panel-close {
+  width: 32px; height: 32px;
+  border: none; background: #eee;
+  border-radius: 50%; font-size: 1.2rem;
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  color: var(--text-secondary);
+}
+
+/* Edit tabs */
+.edit-tabs {
+  display: flex;
+  gap: 0;
+  padding: 4px 16px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.edit-tab {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  font-family: var(--font);
+}
+.edit-tab.active { color: var(--text); border-bottom-color: var(--primary); }
+
+/* Edit list */
+.edit-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  -webkit-overflow-scrolling: touch;
+}
+.edit-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.edit-item span { flex: 1; word-break: break-word; }
+.edit-item-del {
+  width: 28px; height: 28px;
+  border: none; background: transparent;
+  font-size: 1.2rem; cursor: pointer;
+  border-radius: 50%; display: flex;
+  align-items: center; justify-content: center;
+  color: #ccc; flex-shrink: 0;
+  transition: color 0.2s;
+}
+.edit-item-del:active { color: #FF6B6B; }
+
+/* Edit add bar */
+.edit-add {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.edit-add input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+}
+.edit-add input:focus { border-color: var(--primary); }
+.edit-add button {
+  padding: 10px 20px;
+  border: none; border-radius: 20px;
+  background: var(--primary);
+  color: white; font-size: 0.9rem;
+  cursor: pointer; font-family: var(--font);
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.edit-add button:active { background: var(--primary-dark); }
+
+/* History list */
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  -webkit-overflow-scrolling: touch;
+}
+.history-group {
+  margin-bottom: 16px;
+}
+.history-date {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+.history-roll {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.history-roll .hi { display: flex; gap: 6px; align-items: flex-start; }
+.history-roll .hi + .hi { margin-top: 4px; }
+.history-roll .hi-icon { flex-shrink: 0; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px 20px;
+  font-size: 0.9rem;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  z-index: 200;
+  pointer-events: none;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 1.7s forwards;
+  font-family: var(--font);
+}
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* Install banner */
+.install-banner {
+  position: fixed;
+  bottom: 80px;
+  left: 20px;
+  right: 20px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-lg);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideUp 0.4s ease;
+}
+.install-banner span { flex: 1; font-size: 0.85rem; line-height: 1.4; }
+.install-banner button {
+  padding: 8px 18px;
+  border: none; border-radius: 16px;
+  background: var(--primary);
+  color: white; font-size: 0.85rem;
+  cursor: pointer; font-family: var(--font);
+  white-space: nowrap;
+}
+.install-banner .install-close {
+  background: transparent; color: var(--text-secondary);
+  font-size: 1.2rem; padding: 4px 8px;
+}
+
+/* ========== Reduced Motion ========== */
+@media (prefers-reduced-motion: reduce) {
+  .card.rolling, .card.settled { animation: none; }
+  .panel { animation: none; }
+  @keyframes shakeHint { 0%, 100% { transform: rotate(0); } }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="header">
+    <h1>🎲 家庭灵感骰子</h1>
+    <div class="date" id="dateDisplay"></div>
+  </header>
+
+  <div class="cards">
+    <!-- 谦灵 -->
+    <div class="card qianling" id="cardQianling">
+      <div class="card-icon">👧</div>
+      <div class="card-content" id="contentQianling"></div>
+      <button class="card-lock" id="lockQianling" aria-label="锁定">📌</button>
+    </div>
+    <!-- 爱人 -->
+    <div class="card lover" id="cardLover">
+      <div class="card-icon">💑</div>
+      <div class="card-content" id="contentLover"></div>
+      <button class="card-lock" id="lockLover" aria-label="锁定">📌</button>
+    </div>
+    <!-- 经文 -->
+    <div class="card verse" id="cardVerse">
+      <div class="card-icon">🙏</div>
+      <div class="card-content" id="contentVerse"></div>
+      <button class="card-lock" id="lockVerse" aria-label="锁定">📌</button>
+    </div>
+  </div>
+
+  <div class="roll-area">
+    <button class="roll-btn" id="rollBtn" aria-label="摇一摇">🎲</button>
+    <div class="roll-hint">
+      <span class="shake-icon">📳</span> 摇一摇或点按钮
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-btn" id="editBtn" aria-label="编辑内容">✏️</button>
+  <button class="nav-btn" id="historyBtn" aria-label="历史记录">📋</button>
+</div>
+
+<script>
+// ==================== 内容池 ====================
+const DEFAULT_POOLS = {
+  qianling: [
+    '找家里三个蓝色的东西，用英文说出来',
+    '跟谦灵一起唱 Head, Shoulders, Knees and Toes',
+    '用英文数一遍家里的椅子：one chair, two chairs...',
+    '玩 "I spy" 游戏：I spy something red!',
+    '模仿动物声音：cow🐮 dog🐶 cat🐱 duck🦆',
+    'Simon says 谦灵版：touch your nose, clap your hands',
+    '把三个玩具排一排，用英文说它们的颜色',
+    '跟谦灵一起跳 Baby Shark 🦈',
+    '吃水果时说出水果的英文名',
+    '搭积木，边搭边数 one, two, three, four, five',
+    '睡前跟谦灵说：Good night, I love you 🌙',
+    '洗澡时玩：What floats? What sinks?',
+    '画笑脸，边说 eyes, nose, mouth, ears 😊',
+    '让谦灵帮你找东西：Can you find my shoe?',
+    '看窗外说出看到的东西：tree, sky, bird, car',
+    '玩 peek-a-boo 躲猫猫 🙈',
+    '拿出三样水果，让谦灵闭眼猜哪个不见了',
+    '边走边玩 Stop and Go 🟢🔴',
+    '给谦灵一个大大的拥抱说 big hug!',
+    '让谦灵模仿表情：happy😊 sad😢 surprised😲 silly🤪',
+    '说身体部位让谦灵指：Where is your belly?',
+    '一起做动作：jump🦘 spin💫 clap👏 stomp🦶',
+    '袜子配对游戏，边配边说颜色',
+    '用夸张语气读一本英文绘本，不管读对读错',
+    '放一首英文儿歌，跟谦灵一起自由跳舞 💃',
+  ],
+  lover: [
+    '给他发一条不为什么的消息，就三个字',
+    '帮他泡杯茶，什么都不说放在旁边 🍵',
+    '今天夸他一次，具体地夸',
+    '他说话的时候放下手机，就看着他的眼睛',
+    '晚上他回来前，把他拖鞋摆好',
+    '帮他收一件他忘了收的东西',
+    '发一张谦灵今天的照片给他 📸',
+    '认真问他"今天有什么想跟我说的吗"，然后听',
+    '给他削一个水果，切成小块 🍎',
+    '说一句"谢谢你最近______"（填一件具体的事）',
+    '晚上主动说"你先睡，我来收拾"',
+    '发一条朋友圈提到他（不是广告那种）',
+    '帮他手机充上电 🔋',
+    '记下他今天说的一件小事，过几天回头问他',
+    '出门前主动抱一下',
+    '给他放一首他喜欢的歌 🎵',
+    '今天不说"你又..."，换成"我们可以..."',
+    '睡前跟他说一件今天让你想起他的事',
+    '把他杯子里的水加满 🥤',
+    '说一句"跟你在一起挺好的"，不用等回复',
+  ],
+  verse: [
+    '你们要休息，要知道我是神。— 诗篇 46:10',
+    '爱是恒久忍耐，又有恩慈。— 哥林多前书 13:4',
+    '我靠着那加给我力量的，凡事都能做。— 腓立比书 4:13',
+    '不要为明天忧虑。— 马太福音 6:34',
+    '你要专心仰赖耶和华，不可倚靠自己的聪明。— 箴言 3:5',
+    '凡劳苦担重担的人，可以到我这里来，我就使你们得安息。— 马太福音 11:28',
+    '你们愿意人怎样待你们，你们也要怎样待人。— 马太福音 7:12',
+    '耶和华是我的牧者，我必不至缺乏。— 诗篇 23:1',
+    '喜乐的心乃是良药。— 箴言 17:22',
+    '我们爱，因为神先爱我们。— 约翰一书 4:19',
+    '你要保守你心，胜过保守一切。— 箴言 4:23',
+    '温柔的人有福了，因为他们必承受地土。— 马太福音 5:5',
+    '耶和华必在你前面行，必不撇下你，也不丢弃你。— 申命记 31:8',
+    '应当一无挂虑，凡事借着祷告、祈求和感谢，将你们所要的告诉神。— 腓立比书 4:6',
+    '你的话是我脚前的灯，是我路上的光。— 诗篇 119:105',
+    '但那等候耶和华的，必从新得力。— 以赛亚书 40:31',
+    '凡事都有定期，天下万务都有定时。— 传道书 3:1',
+    '你要尽心、尽性、尽意、尽力爱主你的神。— 马可福音 12:30',
+    '神是我们的避难所，是我们的力量。— 诗篇 46:1',
+    '无论做什么，都要从心里做，像是给主做的。— 歌罗西书 3:23',
+    '你们得救在乎归回安息；你们得力在乎平静安稳。— 以赛亚书 30:15',
+    '求你指教我们怎样数算自己的日子，好叫我们得着智慧的心。— 诗篇 90:12',
+    '如今常存的有信，有望，有爱；其中最大的是爱。— 哥林多前书 13:13',
+    '所以你们该彼此劝慰，互相建立。— 帖撒罗尼迦前书 5:11',
+    '你要为真道打那美好的仗，持定永生。— 提摩太前书 6:12',
+  ],
+};
+
+// ==================== 状态 ====================
+const STORAGE_KEY = 'linggan-shaizi';
+const HISTORY_KEY = 'linggan-shaizi-history';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { /* ignore */ }
+  return { pools: null, locked: {}, todayRoll: null };
+}
+
+function saveData(data) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) { /* ignore */ }
+}
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { /* ignore */ }
+  return [];
+}
+
+function saveHistory(rolls) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(rolls));
+  } catch (e) { /* ignore */ }
+}
+
+let data = loadData();
+let pools = data.pools ? { ...DEFAULT_POOLS, ...data.pools } : { ...DEFAULT_POOLS };
+let locked = data.locked || { qianling: false, lover: false, verse: false };
+let history = loadHistory();
+let isRolling = false;
+let currentResults = { qianling: '', lover: '', verse: '' };
+
+// ==================== DOM 引用 ====================
+const $qianling = document.getElementById('contentQianling');
+const $lover = document.getElementById('contentLover');
+const $verse = document.getElementById('contentVerse');
+const $cardQianling = document.getElementById('cardQianling');
+const $cardLover = document.getElementById('cardLover');
+const $cardVerse = document.getElementById('cardVerse');
+const $lockQianling = document.getElementById('lockQianling');
+const $lockLover = document.getElementById('lockLover');
+const $lockVerse = document.getElementById('lockVerse');
+const $rollBtn = document.getElementById('rollBtn');
+const $dateDisplay = document.getElementById('dateDisplay');
+const $editBtn = document.getElementById('editBtn');
+const $historyBtn = document.getElementById('historyBtn');
+
+// ==================== 工具函数 ====================
+function randomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// ==================== 日期显示 ====================
+function updateDate() {
+  const now = new Date();
+  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  $dateDisplay.textContent =
+    `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
+}
+updateDate();
+
+// ==================== 锁定 ====================
+function updateLockUI() {
+  $lockQianling.className = 'card-lock' + (locked.qianling ? ' locked' : '');
+  $lockLover.className = 'card-lock' + (locked.lover ? ' locked' : '');
+  $lockVerse.className = 'card-lock' + (locked.verse ? ' locked' : '');
+}
+updateLockUI();
+
+function toggleLock(category) {
+  locked[category] = !locked[category];
+  updateLockUI();
+  data.locked = locked;
+  saveData(data);
+}
+
+$lockQianling.addEventListener('click', e => { e.stopPropagation(); toggleLock('qianling'); });
+$lockLover.addEventListener('click', e => { e.stopPropagation(); toggleLock('lover'); });
+$lockVerse.addEventListener('click', e => { e.stopPropagation(); toggleLock('verse'); });
+
+// ==================== 动画 ====================
+function animateCardText($el, finalText, pool, duration = 800) {
+  return new Promise(resolve => {
+    const totalSteps = 14;
+    let step = 0;
+    function next() {
+      if (step >= totalSteps) {
+        $el.textContent = finalText;
+        resolve();
+        return;
+      }
+      // 显示随机项（避免连续两次相同）
+      let t;
+      do { t = randomItem(pool); } while (t === $el.textContent && pool.length > 1);
+      $el.textContent = t;
+      step++;
+      const delay = 30 + Math.pow(step / totalSteps, 3) * 180;
+      setTimeout(next, delay);
+    }
+    next();
+  });
+}
+
+async function roll() {
+  if (isRolling) return;
+  isRolling = true;
+  $rollBtn.disabled = true;
+
+  // 选结果
+  if (!locked.qianling) currentResults.qianling = randomItem(pools.qianling);
+  if (!locked.lover) currentResults.lover = randomItem(pools.lover);
+  if (!locked.verse) currentResults.verse = randomItem(pools.verse);
+
+  // 卡片动画
+  const anims = [];
+  if (!locked.qianling) {
+    $cardQianling.classList.add('rolling');
+    anims.push(animateCardText($qianling, currentResults.qianling, pools.qianling));
+  }
+  if (!locked.lover) {
+    $cardLover.classList.add('rolling');
+    anims.push(animateCardText($lover, currentResults.lover, pools.lover));
+  }
+  if (!locked.verse) {
+    $cardVerse.classList.add('rolling');
+    anims.push(animateCardText($verse, currentResults.verse, pools.verse));
+  }
+
+  await Promise.all(anims);
+
+  // 结束动画
+  $cardQianling.classList.remove('rolling');
+  $cardLover.classList.remove('rolling');
+  $cardVerse.classList.remove('rolling');
+  $cardQianling.classList.add('settled');
+  $cardLover.classList.add('settled');
+  $cardVerse.classList.add('settled');
+  setTimeout(() => {
+    $cardQianling.classList.remove('settled');
+    $cardLover.classList.remove('settled');
+    $cardVerse.classList.remove('settled');
+  }, 400);
+
+  // 播放叮声
+  playDing();
+
+  // 存历史
+  const today = todayKey();
+  const entry = {
+    date: today,
+    time: new Date().toISOString(),
+    results: { ...currentResults },
+  };
+  history.unshift(entry);
+  if (history.length > 100) history.length = 100;
+  saveHistory(history);
+
+  // 标记今天已摇
+  data.todayRoll = today;
+  saveData(data);
+
+  isRolling = false;
+  $rollBtn.disabled = false;
+}
+
+// ==================== 叮声音效 ====================
+function playDing() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+    // 两个音符：短促的叮叮
+    [0, 0.12].forEach((offset, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = i === 0 ? 880 : 1100;
+      gain.gain.setValueAtTime(0.15, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.3);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.3);
+    });
+  } catch (e) { /* 静默降级 */ }
+}
+
+// ==================== 摇一摇检测 ====================
+let shakeEnabled = false;
+let lastShakeTime = 0;
+
+function requestShakePermission() {
+  if (typeof DeviceMotionEvent !== 'undefined') {
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      // iOS 13+
+      DeviceMotionEvent.requestPermission()
+        .then(state => {
+          if (state === 'granted') {
+            shakeEnabled = true;
+            showToast('✅ 摇一摇已就绪，试试摇手机吧');
+          }
+        })
+        .catch(() => { /* 用户拒绝 */ });
+    } else {
+      // Android / 其他
+      shakeEnabled = true;
+    }
+  }
+}
+
+function initShake() {
+  const threshold = 15;
+  let lastX, lastY, lastZ;
+  window.addEventListener('devicemotion', e => {
+    if (!shakeEnabled || isRolling) return;
+    const { x, y, z } = e.accelerationIncludingGravity || {};
+    if (lastX === undefined) { lastX = x; lastY = y; lastZ = z; return; }
+    const delta = Math.abs(x - lastX) + Math.abs(y - lastY) + Math.abs(z - lastZ);
+    if (delta > threshold) {
+      const now = Date.now();
+      if (now - lastShakeTime > 1500) {
+        lastShakeTime = now;
+        roll();
+      }
+    }
+    lastX = x; lastY = y; lastZ = z;
+  });
+}
+
+// ==================== 编辑面板 ====================
+let editPanel = null;
+let editCategory = 'qianling';
+
+function openEditPanel() {
+  if (editPanel) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'panel-overlay';
+  overlay.innerHTML = `
+    <div class="panel" id="editPanel">
+      <div class="panel-header">
+        <h3>✏️ 编辑内容</h3>
+        <button class="panel-close" id="editClose">✕</button>
+      </div>
+      <div class="edit-tabs">
+        <button class="edit-tab active" data-cat="qianling">👧 谦灵</button>
+        <button class="edit-tab" data-cat="lover">💑 爱人</button>
+        <button class="edit-tab" data-cat="verse">🙏 经文</button>
+      </div>
+      <div class="edit-list" id="editList"></div>
+      <div class="edit-add">
+        <input type="text" id="editInput" placeholder="添加新的...">
+        <button id="editAddBtn">添加</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  editPanel = overlay;
+
+  renderEditList();
+
+  // 关闭
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeEditPanel();
+  });
+  overlay.querySelector('#editClose').addEventListener('click', closeEditPanel);
+
+  // 切换分类
+  overlay.querySelectorAll('.edit-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      editCategory = tab.dataset.cat;
+      overlay.querySelectorAll('.edit-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderEditList();
+    });
+  });
+
+  // 添加
+  overlay.querySelector('#editAddBtn').addEventListener('click', addEditItem);
+  overlay.querySelector('#editInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addEditItem();
+  });
+}
+
+function closeEditPanel() {
+  if (!editPanel) return;
+  editPanel.remove();
+  editPanel = null;
+}
+
+function renderEditList() {
+  const list = document.getElementById('editList');
+  if (!list) return;
+  const items = pools[editCategory];
+  if (!items.length) {
+    list.innerHTML = '<div class="empty-state">还没有内容，在下方添加吧 ✨</div>';
+    return;
+  }
+  list.innerHTML = items.map((item, i) => `
+    <div class="edit-item">
+      <span>${escapeHTML(item)}</span>
+      <button class="edit-item-del" data-idx="${i}" aria-label="删除">✕</button>
+    </div>
+  `).join('');
+
+  // 删除事件
+  list.querySelectorAll('.edit-item-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      pools[editCategory].splice(idx, 1);
+      savePools();
+      renderEditList();
+      // 如果当前显示的是被删的内容，重新摇
+      if (currentResults[editCategory] === pools[editCategory][idx]) {
+        updateDisplay(editCategory);
+      }
+    });
+  });
+}
+
+function addEditItem() {
+  const input = document.getElementById('editInput');
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) return;
+  pools[editCategory].push(val);
+  savePools();
+  renderEditList();
+  input.value = '';
+  input.focus();
+}
+
+function savePools() {
+  data.pools = {};
+  for (const cat of ['qianling', 'lover', 'verse']) {
+    if (JSON.stringify(pools[cat]) !== JSON.stringify(DEFAULT_POOLS[cat])) {
+      data.pools[cat] = pools[cat];
+    }
+  }
+  saveData(data);
+}
+
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ==================== 历史面板 ====================
+let historyPanel = null;
+
+function openHistoryPanel() {
+  if (historyPanel) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'panel-overlay';
+  overlay.innerHTML = `
+    <div class="panel">
+      <div class="panel-header">
+        <h3>📋 历史记录</h3>
+        <button class="panel-close" id="historyClose">✕</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  historyPanel = overlay;
+  renderHistoryList();
+
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeHistoryPanel();
+  });
+  overlay.querySelector('#historyClose').addEventListener('click', closeHistoryPanel);
+}
+
+function closeHistoryPanel() {
+  if (!historyPanel) return;
+  historyPanel.remove();
+  historyPanel = null;
+}
+
+function renderHistoryList() {
+  const list = document.getElementById('historyList');
+  if (!list) return;
+  if (!history.length) {
+    list.innerHTML = '<div class="empty-state">还没有摇过，快去摇一摇吧 🎲</div>';
+    return;
+  }
+  // 按日期分组
+  const groups = {};
+  history.forEach(h => {
+    if (!groups[h.date]) groups[h.date] = [];
+    groups[h.date].push(h);
+  });
+
+  list.innerHTML = Object.entries(groups).map(([date, rolls]) => `
+    <div class="history-group">
+      <div class="history-date">${formatDate(date)}</div>
+      ${rolls.map(r => `
+        <div class="history-roll">
+          <div class="hi"><span class="hi-icon">👧</span><span>${escapeHTML(r.results.qianling)}</span></div>
+          <div class="hi"><span class="hi-icon">💑</span><span>${escapeHTML(r.results.lover)}</span></div>
+          <div class="hi"><span class="hi-icon">🙏</span><span>${escapeHTML(r.results.verse)}</span></div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function formatDate(dateStr) {
+  const parts = dateStr.split('-');
+  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  return `${parseInt(parts[1])}月${parseInt(parts[2])}日 ${weekdays[d.getDay()]}`;
+}
+
+// ==================== Toast ====================
+function showToast(msg) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
+}
+
+// ==================== 安装提示 ====================
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // 显示安装引导
+  const banner = document.createElement('div');
+  banner.className = 'install-banner';
+  banner.id = 'installBanner';
+  banner.innerHTML = `
+    <span>📲 添加到主屏幕，每天摇一摇更方便</span>
+    <button id="installBtn">添加</button>
+    <button class="install-close" id="installClose">✕</button>
+  `;
+  document.body.appendChild(banner);
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') showToast('✅ 已添加到主屏幕');
+      deferredPrompt = null;
+    }
+    banner.remove();
+  });
+  document.getElementById('installClose').addEventListener('click', () => banner.remove());
+});
+
+// ==================== 初始化显示 ====================
+function initDisplay() {
+  const today = todayKey();
+  // 如果今天还没摇过，自动摇一组
+  if (data.todayRoll !== today) {
+    currentResults.qianling = randomItem(pools.qianling);
+    currentResults.lover = randomItem(pools.lover);
+    currentResults.verse = randomItem(pools.verse);
+
+    $qianling.textContent = currentResults.qianling;
+    $lover.textContent = currentResults.lover;
+    $verse.textContent = currentResults.verse;
+
+    const entry = {
+      date: today,
+      time: new Date().toISOString(),
+      results: { ...currentResults },
+    };
+    history.unshift(entry);
+    if (history.length > 100) history.length = 100;
+    saveHistory(history);
+    data.todayRoll = today;
+    saveData(data);
+  } else {
+    // 用今天第一条历史记录
+    const todayEntries = history.filter(h => h.date === today);
+    if (todayEntries.length > 0) {
+      currentResults = { ...todayEntries[0].results };
+    } else {
+      currentResults.qianling = randomItem(pools.qianling);
+      currentResults.lover = randomItem(pools.lover);
+      currentResults.verse = randomItem(pools.verse);
+    }
+    $qianling.textContent = currentResults.qianling;
+    $lover.textContent = currentResults.lover;
+    $verse.textContent = currentResults.verse;
+  }
+}
+
+// ==================== 事件绑定 ====================
+$rollBtn.addEventListener('click', roll);
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && !isRolling && !editPanel && !historyPanel) {
+    e.preventDefault();
+    roll();
+  }
+});
+$editBtn.addEventListener('click', openEditPanel);
+$historyBtn.addEventListener('click', openHistoryPanel);
+
+// 卡片本身点击也可以重摇
+$cardQianling.addEventListener('click', async () => {
+  if (isRolling || editPanel || historyPanel || locked.qianling) return;
+  isRolling = true;
+  $rollBtn.disabled = true;
+  currentResults.qianling = randomItem(pools.qianling);
+  $cardQianling.classList.add('rolling');
+  await animateCardText($qianling, currentResults.qianling, pools.qianling);
+  $cardQianling.classList.remove('rolling');
+  $cardQianling.classList.add('settled');
+  setTimeout(() => $cardQianling.classList.remove('settled'), 400);
+  playDing();
+  isRolling = false;
+  $rollBtn.disabled = false;
+});
+$cardLover.addEventListener('click', async () => {
+  if (isRolling || editPanel || historyPanel || locked.lover) return;
+  isRolling = true;
+  $rollBtn.disabled = true;
+  currentResults.lover = randomItem(pools.lover);
+  $cardLover.classList.add('rolling');
+  await animateCardText($lover, currentResults.lover, pools.lover);
+  $cardLover.classList.remove('rolling');
+  $cardLover.classList.add('settled');
+  setTimeout(() => $cardLover.classList.remove('settled'), 400);
+  playDing();
+  isRolling = false;
+  $rollBtn.disabled = false;
+});
+$cardVerse.addEventListener('click', async () => {
+  if (isRolling || editPanel || historyPanel || locked.verse) return;
+  isRolling = true;
+  $rollBtn.disabled = true;
+  currentResults.verse = randomItem(pools.verse);
+  $cardVerse.classList.add('rolling');
+  await animateCardText($verse, currentResults.verse, pools.verse);
+  $cardVerse.classList.remove('rolling');
+  $cardVerse.classList.add('settled');
+  setTimeout(() => $cardVerse.classList.remove('settled'), 400);
+  playDing();
+  isRolling = false;
+  $rollBtn.disabled = false;
+});
+
+// ==================== 启动 ====================
+function boot() {
+  initDisplay();
+  initShake();
+  requestShakePermission();
+  // 注册 Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+}
+boot();
+</script>
+</body>
+</html>
