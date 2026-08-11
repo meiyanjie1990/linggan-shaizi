@@ -1,12 +1,12 @@
 {
   "name": "家庭灵感骰子",
   "short_name": "灵感骰子",
-  "description": "每天摇一摇，给谦灵一个游戏，给爱人一份温暖，给自己一句经文",
+  "description": "每天翻三张牌——陪谦灵玩、为爱人做、读一句经文。像精致的桌游一样。",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1E1814",
-  "theme_color": "#1E1814",
+  "background_color": "#1A120C",
+  "theme_color": "#1A120C",
   "icons": [
     {
       "src": "icon.svg",
