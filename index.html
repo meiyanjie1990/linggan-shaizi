@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#F5EDE0">
+<meta name="theme-color" content="#1E1814">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>家庭灵感骰子</title>
@@ -13,283 +13,212 @@
 /* ====== Reset & Base ====== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --paper:#FBF7F2;
-  --card:#FFFDF8;
+  --table:#1E1814;
+  --table-top:#2A2219;
+  --card-front:#FDFAF5;
   --ink:#3D3226;
   --ink-light:#8B7D6E;
   --ink-faint:#BFB5A8;
   --accent-qianling:#E8927C;
   --accent-lover:#C4929E;
   --accent-verse:#C4A86C;
-  --accent-qianling-bg:#FDF3EF;
-  --accent-lover-bg:#FDF3F7;
-  --accent-verse-bg:#FDF9EF;
-  --btn:#C8927A;
-  --btn-active:#B07868;
-  --hairline:rgba(61,50,38,.08);
-  --shadow-card:0 1px 4px rgba(61,50,38,.04),0 4px 16px rgba(61,50,38,.05);
-  --shadow-btn:0 2px 12px rgba(180,120,100,.25);
-  --radius:16px;
+  --accent-qianling-dark:#C57A68;
+  --accent-lover-dark:#A67A86;
+  --accent-verse-dark:#A68D58;
+  --gold:#D4B87A;
+  --hairline:rgba(61,50,38,.1);
+  --shadow-card:0 8px 30px rgba(0,0,0,.4);
+  --shadow-flipped:0 4px 16px rgba(0,0,0,.25);
+  --radius:14px;
   --font-ui:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
   --font-text:"STSong","Songti SC","Noto Serif SC","PingFang SC",serif;
   --safe-bottom:env(safe-area-inset-bottom,16px);
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --paper:#1E1B18;
-    --card:#282420;
-    --ink:#E0D8CD;
-    --ink-light:#9B9080;
-    --ink-faint:#5C5348;
-    --accent-qianling-bg:#2D1F1B;
-    --accent-lover-bg:#2B1F24;
-    --accent-verse-bg:#2B2519;
-    --hairline:rgba(224,216,205,.06);
-    --shadow-card:0 1px 4px rgba(0,0,0,.15),0 4px 16px rgba(0,0,0,.2);
-    --shadow-btn:0 2px 14px rgba(160,100,80,.2);
+    --table:#0F0C09;
+    --table-top:#1A1510;
+    --card-front:#F5F0E8;
   }
 }
 html{height:100%;overflow:hidden}
 body{
   font-family:var(--font-ui);
-  background:var(--paper);
+  background:var(--table);
   color:var(--ink);
-  height:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  height:100%;display:flex;justify-content:center;align-items:center;
   -webkit-tap-highlight-color:transparent;
-  -webkit-user-select:none;user-select:none;
-  overflow:hidden;
+  -webkit-user-select:none;user-select:none;overflow:hidden;
 }
-/* subtle paper grain */
+/* table surface texture */
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  opacity:.03;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background:
+    radial-gradient(ellipse at 50% 0%,var(--table-top) 0%,var(--table) 70%);
 }
-@media (prefers-color-scheme:dark){body::before{opacity:.04}}
+@supports (background:mix){
+  body::after{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
 
-.app{
-  width:100%;max-width:420px;height:100%;
-  display:flex;flex-direction:column;
-  padding:24px 18px 0;
-  position:relative;z-index:1;
-}
+.app{width:100%;max-width:420px;height:100%;display:flex;flex-direction:column;padding:20px 16px 0;position:relative;z-index:1}
 
 /* ====== Header ====== */
-.header{text-align:center;padding:8px 0 4px;flex-shrink:0}
-.header h1{
-  font-size:1.35rem;font-weight:400;letter-spacing:.06em;
-  color:var(--ink);font-family:var(--font-text);
+.header{text-align:center;padding:6px 0 2px;flex-shrink:0}
+.header h1{font-size:1.2rem;font-weight:400;letter-spacing:.08em;color:rgba(255,255,255,.85);font-family:var(--font-text)}
+.header .date{font-size:.7rem;color:rgba(255,255,255,.4);margin-top:3px;font-family:var(--font-text);letter-spacing:.04em}
+
+/* ====== Card Area ====== */
+.cards-area{flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center;padding:8px 4px;perspective:1200px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ====== Single Card ====== */
+.card-item{position:relative;height:150px;cursor:pointer}
+.card-inner{position:relative;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.card-inner.flipped{transform:rotateY(180deg)}
+.card-inner.flipping-back{transition:transform .45s ease-in}
+
+/* Card faces */
+.card-face{position:absolute;inset:0;border-radius:var(--radius);backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+
+/* ---- BACK ---- */
+.card-back{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-card);border:2px solid rgba(255,255,255,.08);
 }
-.header .ornament{
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  margin:6px 0 2px;
+.card-back-inner{text-align:center;position:relative;z-index:1}
+.card-back-icon{font-size:2.4rem;display:block;margin-bottom:6px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))}
+.card-back-label{font-size:.8rem;letter-spacing:.1em;color:rgba(255,255,255,.85);font-family:var(--font-text)}
+
+/* Card back patterns */
+.card-back.qianling{
+  background:
+    radial-gradient(circle at 20% 30%,rgba(255,255,255,.08) 0%,transparent 50%),
+    radial-gradient(circle at 80% 70%,rgba(0,0,0,.15) 0%,transparent 50%),
+    linear-gradient(135deg,var(--accent-qianling-dark),var(--accent-qianling));
 }
-.header .ornament::before,.header .ornament::after{
-  content:'';width:28px;height:1px;background:var(--ink-faint);
+.card-back.qianling::before{
+  content:'';position:absolute;inset:0;opacity:.15;
+  background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1px);
+  background-size:20px 20px;
 }
-.header .ornament span{font-size:.7rem;color:var(--ink-faint)}
-.header .date{
-  font-size:.75rem;color:var(--ink-light);margin-top:2px;
-  font-family:var(--font-text);letter-spacing:.04em;
+.card-back.lover{
+  background:
+    radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.1) 0%,transparent 60%),
+    radial-gradient(ellipse at 70% 80%,rgba(0,0,0,.15) 0%,transparent 60%),
+    linear-gradient(160deg,var(--accent-lover-dark),var(--accent-lover));
+}
+.card-back.lover::before{
+  content:'';position:absolute;inset:0;opacity:.12;
+  background:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(255,255,255,.3) 8px,rgba(255,255,255,.3) 9px);
+}
+.card-back.verse{
+  background:
+    radial-gradient(circle at 50% 30%,rgba(255,255,255,.12) 0%,transparent 50%),
+    linear-gradient(170deg,var(--accent-verse-dark),var(--accent-verse));
+}
+.card-back.verse::before{
+  content:'';position:absolute;inset:0;opacity:.08;
+  background:
+    repeating-linear-gradient(0deg,transparent,transparent 14px,rgba(255,255,255,.4) 14px,rgba(255,255,255,.4) 15px),
+    repeating-linear-gradient(90deg,transparent,transparent 14px,rgba(255,255,255,.4) 14px,rgba(255,255,255,.4) 15px);
+}
+/* subtle gold border on back */
+.card-back::after{
+  content:'';position:absolute;inset:6px;border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);pointer-events:none;z-index:2;
 }
 
-/* ====== Cards ====== */
-.cards{
-  flex:1;display:flex;flex-direction:column;gap:12px;
-  justify-content:center;padding:8px 0;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;
-}
-.card{
-  background:var(--card);border-radius:var(--radius);
-  padding:18px 16px 18px 18px;
-  box-shadow:var(--shadow-card);
-  position:relative;display:flex;align-items:flex-start;
+/* ---- FRONT ---- */
+.card-front{
+  background:var(--card-front);
+  transform:rotateY(180deg);
+  box-shadow:var(--shadow-flipped);
+  display:flex;align-items:center;padding:16px 18px;
   border-left:4px solid transparent;
-  transition:transform .3s ease,border-color .3s ease;
-  min-height:78px;
 }
-.card.qianling{border-left-color:var(--accent-qianling)}
-.card.lover{border-left-color:var(--accent-lover)}
-.card.verse{border-left-color:var(--accent-verse)}
+.card-front.qianling{border-left-color:var(--accent-qianling)}
+.card-front.lover{border-left-color:var(--accent-lover)}
+.card-front.verse{border-left-color:var(--accent-verse)}
+.front-icon{font-size:2rem;margin-right:14px;flex-shrink:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.card-front.qianling .front-icon{background:#FDF3EF}
+.card-front.lover .front-icon{background:#FDF3F7}
+.card-front.verse .front-icon{background:#FDF9EF}
+.front-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.front-label{font-size:.65rem;color:var(--ink-light);letter-spacing:.08em;text-transform:uppercase}
+.front-text{font-size:.92rem;line-height:1.6;font-family:var(--font-text);word-break:break-word;min-height:2.4em;display:flex;align-items:center}
+.card-front.verse .front-text{font-style:italic}
 
-.card.rolling{animation:cardPulse .7s ease}
-@keyframes cardPulse{0%{transform:scale(1)}20%{transform:scale(.98)}60%{transform:scale(1.01)}100%{transform:scale(1)}}
-.card.settled{animation:cardSettle .35s ease}
-@keyframes cardSettle{0%{transform:scale(1.01)}50%{transform:scale(.99)}100%{transform:scale(1)}}
+/* Lock dot on front */
+.front-lock{position:absolute;top:10px;right:12px;width:8px;height:8px;border-radius:50%;background:var(--ink-faint);transition:background .2s}
+.front-lock.active{background:var(--accent-qianling)}
 
-.card-icon{
-  font-size:1.6rem;margin-right:12px;flex-shrink:0;
-  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;
-}
-.card.qianling .card-icon{background:var(--accent-qianling-bg)}
-.card.lover .card-icon{background:var(--accent-lover-bg)}
-.card.verse .card-icon{background:var(--accent-verse-bg)}
-
-.card-body{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
-.card-label{
-  font-size:.7rem;color:var(--ink-light);letter-spacing:.06em;
-  font-family:var(--font-ui);text-transform:uppercase;
-}
-.card-text{
-  font-size:.95rem;line-height:1.65;font-family:var(--font-text);
-  word-break:break-word;min-height:2.4em;display:flex;align-items:center;
-}
-.card.verse .card-text{font-style:italic}
-
-.card-lock{
-  position:absolute;top:10px;right:10px;
-  width:28px;height:28px;border:none;background:transparent;
-  font-size:.85rem;cursor:pointer;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  opacity:.25;transition:opacity .2s,transform .2s;z-index:2;
-  color:var(--ink);
-}
-.card-lock:active{transform:scale(.85)}
-.card-lock.locked{opacity:.7}
-
-/* ====== Roll Button ====== */
-.roll-area{
-  flex-shrink:0;display:flex;flex-direction:column;align-items:center;
-  padding:14px 0 calc(14px + var(--safe-bottom));
-}
-.roll-btn{
-  height:52px;padding:0 40px;border-radius:26px;
-  border:1.5px solid var(--btn);
-  background:var(--card);color:var(--btn);
-  font-size:1.1rem;cursor:pointer;font-family:var(--font-text);
-  letter-spacing:.04em;box-shadow:var(--shadow-btn);
-  transition:all .15s;display:flex;align-items:center;gap:8px;
-  -webkit-tap-highlight-color:transparent;
-}
-.roll-btn:active{background:var(--btn);color:#fff;transform:scale(.96)}
-.roll-btn:disabled{opacity:.4;cursor:not-allowed}
-.roll-btn .dice{font-size:1.4rem}
-.roll-hint{
-  font-size:.7rem;color:var(--ink-faint);margin-top:8px;
-  display:flex;align-items:center;gap:4px;font-family:var(--font-text);
+/* ====== Sparkles ====== */
+.sparkle{position:fixed;pointer-events:none;z-index:90;animation:sparkleBurst .8s ease-out forwards}
+@keyframes sparkleBurst{
+  0%{opacity:1;transform:translate(0,0) scale(1)}
+  100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(0)}
 }
 
-/* ====== Bottom Nav ====== */
-.bottom-nav{
-  position:fixed;bottom:calc(12px + var(--safe-bottom));right:14px;
-  display:flex;gap:6px;z-index:10;
+/* ====== Bottom ====== */
+.actions{flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:10px 0 calc(10px + var(--safe-bottom));gap:8px}
+.reset-btn{
+  padding:10px 32px;border-radius:22px;border:1.5px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);
+  font-size:.85rem;cursor:pointer;font-family:var(--font-text);letter-spacing:.06em;
+  transition:all .15s;backdrop-filter:blur(4px);
+  display:flex;align-items:center;gap:6px;
 }
+.reset-btn:active{background:rgba(255,255,255,.14);color:#fff;transform:scale(.96)}
+.reset-btn:disabled{opacity:.35;cursor:not-allowed}
+.hint{font-size:.65rem;color:rgba(255,255,255,.25);font-family:var(--font-text);display:flex;align-items:center;gap:4px}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:calc(10px + var(--safe-bottom));right:12px;display:flex;gap:6px;z-index:20}
 .nav-btn{
-  width:36px;height:36px;border-radius:50%;border:1px solid var(--hairline);
-  background:var(--card);box-shadow:var(--shadow-card);
-  font-size:1rem;cursor:pointer;display:flex;align-items:center;
-  justify-content:center;color:var(--ink-light);
-  transition:all .15s;
+  width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);font-size:.95rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.45);transition:all .15s;
 }
-.nav-btn:active{background:var(--paper);transform:scale(.9)}
+.nav-btn:active{background:rgba(255,255,255,.15);color:#fff;transform:scale(.9)}
 
-/* ====== Panel ====== */
-.panel-overlay{
-  position:fixed;inset:0;background:rgba(30,27,24,.35);z-index:100;
-  display:flex;align-items:flex-end;animation:fadeIn .2s ease;
-}
+/* ====== Panel Overlay ====== */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;display:flex;align-items:flex-end;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.panel{
-  background:var(--card);width:100%;max-width:420px;
-  max-height:78vh;border-radius:22px 22px 0 0;
-  display:flex;flex-direction:column;animation:slideUp .3s ease;
-  padding-bottom:var(--safe-bottom);
-}
+.panel{background:var(--card-front);width:100%;max-width:420px;max-height:78vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;animation:slideUp .3s ease;padding-bottom:var(--safe-bottom);color:var(--ink)}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.panel-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px 10px;
-}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 10px}
 .panel-header h3{font-size:1rem;font-weight:500;font-family:var(--font-text)}
-.panel-close{
-  width:30px;height:30px;border:1px solid var(--hairline);background:transparent;
-  border-radius:50%;font-size:1rem;cursor:pointer;display:flex;
-  align-items:center;justify-content:center;color:var(--ink-light);
-}
-
+.panel-close{width:30px;height:30px;border:1px solid var(--hairline);background:transparent;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink-light)}
 .edit-tabs{display:flex;padding:0 16px;gap:4px;margin-bottom:8px}
-.edit-tab{
-  padding:7px 14px;border:1px solid var(--hairline);border-radius:16px;
-  background:transparent;font-size:.8rem;cursor:pointer;
-  color:var(--ink-light);font-family:var(--font-ui);
-  transition:all .2s;
-}
-.edit-tab.active{background:var(--ink);color:var(--card);border-color:var(--ink)}
-
+.edit-tab{padding:7px 14px;border:1px solid var(--hairline);border-radius:16px;background:transparent;font-size:.8rem;cursor:pointer;color:var(--ink-light);font-family:var(--font-ui);transition:all .2s}
+.edit-tab.active{background:var(--ink);color:var(--card-front);border-color:var(--ink)}
 .edit-list{flex:1;overflow-y:auto;padding:8px 16px;-webkit-overflow-scrolling:touch}
-.edit-item{
-  display:flex;align-items:center;gap:10px;padding:9px 0;
-  border-bottom:1px solid var(--hairline);
-  font-size:.85rem;line-height:1.5;font-family:var(--font-text);
-}
+.edit-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--hairline);font-size:.85rem;line-height:1.5;font-family:var(--font-text)}
 .edit-item span{flex:1;word-break:break-word}
-.edit-item-del{
-  width:26px;height:26px;border:none;background:transparent;
-  font-size:1rem;cursor:pointer;border-radius:50%;display:flex;
-  align-items:center;justify-content:center;color:var(--ink-faint);
-  flex-shrink:0;transition:color .2s;
-}
+.edit-item-del{width:26px;height:26px;border:none;background:transparent;font-size:1rem;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);flex-shrink:0}
 .edit-item-del:active{color:#c0392b}
-
 .edit-add{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--hairline)}
-.edit-add input{
-  flex:1;padding:9px 14px;border:1px solid var(--hairline);border-radius:18px;
-  font-size:.85rem;font-family:var(--font-text);background:var(--paper);
-  color:var(--ink);outline:none;
-}
+.edit-add input{flex:1;padding:9px 14px;border:1px solid var(--hairline);border-radius:18px;font-size:.85rem;font-family:var(--font-text);background:#FBF7F2;color:var(--ink);outline:none}
 .edit-add input:focus{border-color:var(--ink-light)}
-.edit-add button{
-  padding:9px 18px;border:none;border-radius:18px;
-  background:var(--ink);color:var(--card);font-size:.85rem;
-  cursor:pointer;font-family:var(--font-ui);white-space:nowrap;
-}
-
+.edit-add button{padding:9px 18px;border:none;border-radius:18px;background:var(--ink);color:#fff;font-size:.85rem;cursor:pointer;font-family:var(--font-ui);white-space:nowrap}
 .history-list{flex:1;overflow-y:auto;padding:8px 16px;-webkit-overflow-scrolling:touch}
 .history-group{margin-bottom:14px}
 .history-date{font-size:.75rem;color:var(--ink-light);margin-bottom:6px;padding-left:4px}
-.history-roll{
-  background:var(--paper);border-radius:12px;padding:10px 14px;
-  margin-bottom:6px;font-size:.8rem;line-height:1.55;font-family:var(--font-text);
-}
+.history-roll{background:#FBF7F2;border-radius:12px;padding:10px 14px;margin-bottom:6px;font-size:.8rem;line-height:1.55;font-family:var(--font-text)}
 .history-roll .hi{display:flex;gap:6px;align-items:flex-start}
 .history-roll .hi+.hi{margin-top:3px}
 .history-roll .hi-icon{flex-shrink:0}
-
 .empty-state{text-align:center;color:var(--ink-faint);padding:36px 20px;font-size:.85rem;font-family:var(--font-text)}
-
-.toast{
-  position:fixed;top:50px;left:50%;transform:translateX(-50%);
-  background:var(--ink);color:var(--card);padding:8px 20px;
-  border-radius:16px;font-size:.8rem;z-index:200;pointer-events:none;
-  font-family:var(--font-text);
-  animation:toastIn .25s ease,toastOut .25s ease 1.5s forwards;
-}
+.toast{position:fixed;top:50px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.9);color:#1E1814;padding:8px 20px;border-radius:16px;font-size:.8rem;z-index:200;pointer-events:none;font-family:var(--font-text);animation:toastIn .25s ease,toastOut .25s ease 1.5s forwards}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes toastOut{from{opacity:1}to{opacity:0}}
 
-.install-banner{
-  position:fixed;bottom:72px;left:14px;right:14px;
-  background:var(--card);border-radius:14px;padding:12px 16px;
-  box-shadow:0 4px 24px rgba(0,0,0,.12);z-index:50;
-  display:flex;align-items:center;gap:10px;animation:slideUp .35s ease;
-  border:1px solid var(--hairline);
-}
-.install-banner span{flex:1;font-size:.8rem;line-height:1.4;font-family:var(--font-text)}
-.install-banner button{
-  padding:7px 16px;border:none;border-radius:14px;
-  background:var(--ink);color:var(--card);font-size:.8rem;
-  cursor:pointer;font-family:var(--font-ui);white-space:nowrap;
-}
-.install-banner .install-close{
-  background:transparent;color:var(--ink-light);font-size:1rem;padding:4px 6px
-}
-
 @media (prefers-reduced-motion:reduce){
-  .card.rolling,.card.settled{animation:none}
+  .card-inner{transition:none!important}
+  .sparkle{animation:none;display:none}
   .panel{animation:none}
 }
 </style>
@@ -299,42 +228,74 @@ body::before{
 <div class="app">
   <header class="header">
     <h1>家庭灵感骰子</h1>
-    <div class="ornament"><span>✦</span></div>
     <div class="date" id="dateDisplay"></div>
   </header>
 
-  <div class="cards">
-    <div class="card qianling" id="cardQianling">
-      <div class="card-icon">👧</div>
-      <div class="card-body">
-        <div class="card-label">和谦灵玩</div>
-        <div class="card-text" id="contentQianling"></div>
+  <div class="cards-area" id="cardsArea">
+    <!-- 谦灵 -->
+    <div class="card-item" id="cardItemQianling" data-cat="qianling">
+      <div class="card-inner" id="cardInnerQianling">
+        <div class="card-face card-back qianling">
+          <div class="card-back-inner">
+            <span class="card-back-icon">👧</span>
+            <span class="card-back-label">和谦灵玩</span>
+          </div>
+        </div>
+        <div class="card-face card-front qianling">
+          <div class="front-icon">👧</div>
+          <div class="front-body">
+            <div class="front-label">和谦灵玩</div>
+            <div class="front-text" id="textQianling"></div>
+          </div>
+          <div class="front-lock" id="lockDotQianling"></div>
+        </div>
       </div>
-      <button class="card-lock" id="lockQianling" aria-label="锁定">🔒</button>
     </div>
-    <div class="card lover" id="cardLover">
-      <div class="card-icon">💑</div>
-      <div class="card-body">
-        <div class="card-label">为爱人做</div>
-        <div class="card-text" id="contentLover"></div>
+    <!-- 爱人 -->
+    <div class="card-item" id="cardItemLover" data-cat="lover">
+      <div class="card-inner" id="cardInnerLover">
+        <div class="card-face card-back lover">
+          <div class="card-back-inner">
+            <span class="card-back-icon">💑</span>
+            <span class="card-back-label">为爱人做</span>
+          </div>
+        </div>
+        <div class="card-face card-front lover">
+          <div class="front-icon">💑</div>
+          <div class="front-body">
+            <div class="front-label">为爱人做</div>
+            <div class="front-text" id="textLover"></div>
+          </div>
+          <div class="front-lock" id="lockDotLover"></div>
+        </div>
       </div>
-      <button class="card-lock" id="lockLover" aria-label="锁定">🔒</button>
     </div>
-    <div class="card verse" id="cardVerse">
-      <div class="card-icon">🙏</div>
-      <div class="card-body">
-        <div class="card-label">今日经文</div>
-        <div class="card-text" id="contentVerse"></div>
+    <!-- 经文 -->
+    <div class="card-item" id="cardItemVerse" data-cat="verse">
+      <div class="card-inner" id="cardInnerVerse">
+        <div class="card-face card-back verse">
+          <div class="card-back-inner">
+            <span class="card-back-icon">🙏</span>
+            <span class="card-back-label">今日经文</span>
+          </div>
+        </div>
+        <div class="card-face card-front verse">
+          <div class="front-icon">🙏</div>
+          <div class="front-body">
+            <div class="front-label">今日经文</div>
+            <div class="front-text" id="textVerse"></div>
+          </div>
+          <div class="front-lock" id="lockDotVerse"></div>
+        </div>
       </div>
-      <button class="card-lock" id="lockVerse" aria-label="锁定">🔒</button>
     </div>
   </div>
 
-  <div class="roll-area">
-    <button class="roll-btn" id="rollBtn" aria-label="摇一摇">
-      <span class="dice">🎲</span> 摇一摇
+  <div class="actions">
+    <button class="reset-btn" id="resetBtn">
+      <span>🔄</span> 重新洗牌
     </button>
-    <div class="roll-hint">📳 摇晃手机也能触发</div>
+    <div class="hint">点卡片翻开 · 摇晃手机也可触发</div>
   </div>
 </div>
 
@@ -347,666 +308,296 @@ body::before{
 // ==================================================================
 //  内容池 — 每类 100+ 条
 // ==================================================================
-const DEFAULT_POOLS = {
-  // ---- 谦灵游戏：105条 ----
-  qianling: [
-    // 颜色（10条）
-    '找家里三个蓝色的东西，用英文说出来 💙',
-    '玩 I spy：I spy something red! 在房间里找红色的东西',
-    '把彩色积木按颜色分组：red, blue, yellow, green',
-    '穿衣服时说颜色：Today we wear a yellow shirt!',
-    '画彩虹，边画边说：red, orange, yellow, green, blue, purple',
-    '拿出水果问：What color is the apple? Red!',
-    '找两种同色的东西，比赛谁找得快',
-    '走在路上玩：Point to something green! 🌿',
-    '把彩笔倒在桌上，让谦灵帮你拿特定颜色',
-    '洗澡时扔彩色玩具进水：The blue fish is swimming!',
-    // 身体部位（8条）
-    '唱 Head, Shoulders, Knees and Toes，越唱越快 🎵',
-    'Simon says 谦灵版：touch your nose, clap your hands, wiggle your ears',
-    '指着身体问：Where is your belly button? Where are your elbows?',
-    '画一个大大的自画像，边画边说身体部位',
-    '洗澡时说：Wash your tummy, wash your toes 🛁',
-    '让谦灵当小老师指你的身体部位，你来用英文说',
-    '照镜子做表情：Show me your happy face! Show me your silly face!',
-    '跳舞时说动作：Shake your head, wiggle your fingers, stomp your feet',
-    // 动物（8条）
-    '模仿动物声音让对方猜：Moo! 🐮 Oink! 🐷 Quack! 🦆',
-    '拿动物玩具排队，用英文点名：Here comes the elephant! 🐘',
-    '学动物走路：Hop like a bunny, crawl like a bear, swim like a fish',
-    '看动物绘本时间：每翻一页说出动物名字',
-    '玩动物分类：Which animals live on the farm? Which in the jungle?',
-    '自己编动物歌：Old MacDonald had a farm, E-I-E-I-O',
-    '画一个动物园，每画一只就说名字',
-    '睡前选一个动物说晚安：Good night, little cat 🐱',
-    // 数字数数（10条）
-    '搭积木数数：One block, two blocks, three blocks...',
-    '上下楼梯时数台阶：Step one, step two... 🪜',
-    '数手指和脚趾：How many fingers? Let\'s count!',
-    '吃零食数葡萄干：One raisin, two raisins... 吃完啦',
-    '藏三个玩具让谦灵数：How many toys can you find?',
-    '玩小车排队：The first car is red, the second is blue...',
-    '手指谣：One little finger, two little fingers... 👆',
-    '数家里有几把椅子、几个枕头',
-    '用英文倒数：Three, two, one... blast off! 🚀',
-    '画画时数：Draw one sun, two clouds, three flowers',
-    // 动作动词（10条）
-    '做动作游戏：Jump! 🦘 Spin! 💫 Clap! 👏 Stomp! 🦶 Sit down!',
-    'Freeze dance：放音乐跳舞，停的时候不许动 ❄️',
-    '模仿天气预报：Wind blows (吹气), rain falls (手指下落), sun shines (手臂画圆)',
-    '让谦灵给指令你来做（她会觉得超好笑）',
-    '边走边玩 Stop and Go 🟢🔴',
-    '瑜伽婴儿版：Stretch like a cat, curl like a ball',
-    '拍气球的游戏：Keep the balloon up! Hit it! 🎈',
-    '睡前做：Stretch your arms, wiggle your toes, close your eyes',
-    '用不同方式走路：Walk slowly, walk quickly, tiptoe, stomp',
-    '边做饭边给谦灵看动作：Mommy is stirring, mixing, pouring',
-    // 食物水果（8条）
-    '吃水果时办水果派对：This is an apple 🍎, this is a banana 🍌',
-    '让谦灵帮忙摆水果：Can you put the orange next to the apple?',
-    '闻一闻猜水果：Smell this. What is it?',
-    '榨果汁时说出水果名：We are making orange juice! 🍊',
-    '办一个水果颜色展览：All the red fruits here, all the yellow ones there',
-    '假装开餐厅，谦灵点菜你说英文',
-    '切水果时数有几块：How many pieces of apple?',
-    '下午茶时间：Would you like some water or milk? 🥛',
-    // 日常习惯（10条）
-    '早晨问候：Good morning, sunshine! ☀️ How did you sleep?',
-    '刷牙歌：Brush brush brush your teeth, make them nice and clean 🪥',
-    '洗手时唱：Wash your hands, wash wash wash',
-    '穿衣服时说：First your left arm, then your right arm',
-    '收拾玩具时：Let\'s put the toys to sleep. Good night, blocks!',
-    '出门前：Put on your shoes. Left shoe, right shoe 👟',
-    '回家后：Take off your shoes. Hang up your coat.',
-    '饭前说：Time to eat! What do you see on the table?',
-    '睡前仪式：Put on pajamas, read a book, turn off the light 🌙',
-    '表达感受：Are you feeling happy, tired, or hungry?',
-    // 自然观察（8条）
-    '看窗外说出看到的东西：I see a tree 🌳, a bird 🐦, the sky ☁️',
-    '捡树叶说出颜色和大小：This leaf is yellow and big',
-    '下雨天站在窗边：Rain is falling. Pitter-patter ☔',
-    '看月亮和星星：Look at the moon! Twinkle twinkle little star ⭐',
-    '浇花时：Let\'s water the flowers. They are thirsty 💐',
-    '找蚂蚁或蜗牛观察：Look, a tiny ant! It\'s so small 🐜',
-    '看云的形状：That cloud looks like a bunny! What do you see?',
-    '收衣服时说：These are your clothes. Soft and warm ☀️',
-    // 情绪表情（6条）
-    '照镜子做表情：Show me happy 😊 Show me sad 😢 Show me surprised 😲',
-    '读绘本时问：How does the bunny feel? Is she happy or sad?',
-    '画表情脸谱：Let\'s draw a happy face, a sleepy face, a silly face',
-    '唱 If You\'re Happy and You Know It 改编版',
-    '睡前复盘：Today was fun! What made you happy today?',
-    '生气时教她说：I feel angry. It\'s okay to feel angry.',
-    // 儿歌童谣（8条）
-    '唱 Baby Shark 加上全家版本（Mommy Shark, Daddy Shark 🦈）',
-    'Twinkle Twinkle Little Star 跟谦灵一起做手势 ⭐',
-    'The Wheels on the Bus 改编成大理版（The wheels on the bus go round and round）',
-    'Old MacDonald 让谦灵选动物你唱',
-    'Finger Family 手指一家：Daddy finger, Mommy finger...',
-    'Rain Rain Go Away 下雨天专用 ☔',
-    'Row Row Row Your Boat 面对面拉着小手划船',
-    '自己编歌：用两只老虎的调唱英文单词',
-    // 感官探索（8条）
-    '摸不同材质说感觉：soft (毛巾), rough (刷子), smooth (镜子), bumpy (积木)',
-    '听声音猜东西：铃铛🔔 钥匙🔑 水声💧 拍手👏',
-    '闻一闻猜是什么：橙子🍊 咖啡☕ 面包🍞 花香🌸',
-    '光脚在不同地面走：carpet (软), floor (硬), grass (扎)',
-    '玩水游戏：Pour the water. Splash! Float or sink?',
-    '沙子/米/豆子感官盆：Scoop, pour, dig, find treasures',
-    '吹泡泡：Blow bubbles! Big bubble, small bubble 🫧',
-    '玩橡皮泥：Roll it, squish it, make a ball, make a snake',
-    // 假装游戏（8条）
-    '开商店：What would you like to buy? An apple? That\'s two yuan 💰',
-    '照顾娃娃：The baby is hungry. Let\'s feed her 🍼',
-    '坐火车去北京：All aboard! Choo choo! 🚂 Where are we going?',
-    '煮饭游戏：Let\'s make soup. Put in the carrots, stir stir stir 🥕',
-    '医生游戏：The teddy bear has a tummy ache. Can you help? 🩺',
-    '打电话：Ring ring! Hello? How are you today? 📞',
-    '搭帐篷读绘本：Let\'s camp in the living room! 🔦',
-    '给小动物排队上课：Sit down, class! Today we learn colors',
-    // 运动大动作（5条）
-    '障碍赛道：Crawl under the table, jump over the pillow, run to the door',
-    '扔球游戏：Throw the ball! Catch! Roll it to Mommy 🏀',
-    '模仿动物走：Crawl like a crab, hop like a frog, slide like a snake',
-    '枕头路踩平衡：Walk on the pillows without falling',
-    '打气球不落地：Don\'t let it touch the ground! 🎈',
-    // 额外小游戏（8条）
-    '袜子配对，边配边用英文说颜色和大小',
-    '让谦灵帮你找东西：Can you find Mommy\'s shoe? 👠',
-    '藏东西游戏：Where is the ball? Under the blanket? Behind the door?',
-    'What\'s missing? 放三个东西，谦灵闭眼，拿走一个让她猜',
-    '模仿秀：Copy Mommy! (做鬼脸、动作、声音)',
-    '照相时间：Say cheese! Strike a pose! 📸',
-    '一个接一个：我说一个词你说一个词，轮流说动物/颜色/食物',
-    '睡前数一数今天最开心的三件事：My three happy things today',
-  ],
+const DEFAULT_POOLS={qianling:[
+'找家里三个蓝色的东西，用英文说出来 💙','玩 I spy：I spy something red! 在房间里找红色的东西','把彩色积木按颜色分组：red, blue, yellow, green','穿衣服时说颜色：Today we wear a yellow shirt!','画彩虹，边画边说：red, orange, yellow, green, blue, purple','拿出水果问：What color is the apple? Red!','找两种同色的东西，比赛谁找得快','走在路上玩：Point to something green! 🌿','把彩笔倒在桌上，让谦灵帮你拿特定颜色','洗澡时扔彩色玩具进水：The blue fish is swimming!',
+'唱 Head, Shoulders, Knees and Toes，越唱越快 🎵','Simon says 谦灵版：touch your nose, clap your hands, wiggle your ears','指着身体问：Where is your belly button? Where are your elbows?','画一个大大的自画像，边画边说身体部位','洗澡时说：Wash your tummy, wash your toes 🛁','让谦灵当小老师指你的身体部位，你来用英文说','照镜子做表情：Show me your happy face! Show me your silly face!','跳舞时说动作：Shake your head, wiggle your fingers, stomp your feet',
+'模仿动物声音让对方猜：Moo! 🐮 Oink! 🐷 Quack! 🦆','拿动物玩具排队，用英文点名：Here comes the elephant! 🐘','学动物走路：Hop like a bunny, crawl like a bear, swim like a fish','看动物绘本时间：每翻一页说出动物名字','玩动物分类：Which animals live on the farm? Which in the jungle?','自己编动物歌：Old MacDonald had a farm, E-I-E-I-O','画一个动物园，每画一只就说名字','睡前选一个动物说晚安：Good night, little cat 🐱',
+'搭积木数数：One block, two blocks, three blocks...','上下楼梯时数台阶：Step one, step two... 🪜','数手指和脚趾：How many fingers? Let\'s count!','吃零食数葡萄干：One raisin, two raisins... 吃完啦','藏三个玩具让谦灵数：How many toys can you find?','玩小车排队：The first car is red, the second is blue...','手指谣：One little finger, two little fingers... 👆','数家里有几把椅子、几个枕头','用英文倒数：Three, two, one... blast off! 🚀','画画时数：Draw one sun, two clouds, three flowers',
+'做动作游戏：Jump! 🦘 Spin! 💫 Clap! 👏 Stomp! 🦶 Sit down!','Freeze dance：放音乐跳舞，停的时候不许动 ❄️','模仿天气预报：Wind blows, rain falls, sun shines','让谦灵给指令你来做（她会觉得超好笑）','边走边玩 Stop and Go 🟢🔴','瑜伽婴儿版：Stretch like a cat, curl like a ball','拍气球的游戏：Keep the balloon up! Hit it! 🎈','睡前做：Stretch your arms, wiggle your toes, close your eyes','用不同方式走路：Walk slowly, quickly, tiptoe, stomp','边做饭边给谦灵看动作：Mommy is stirring, mixing, pouring',
+'吃水果时办水果派对：This is an apple 🍎, this is a banana 🍌','让谦灵帮忙摆水果：Can you put the orange next to the apple?','闻一闻猜水果：Smell this. What is it?','榨果汁时说出水果名：We are making orange juice! 🍊','办一个水果颜色展览：All the red fruits here, all the yellow ones there','假装开餐厅，谦灵点菜你说英文','切水果时数有几块：How many pieces of apple?','下午茶时间：Would you like some water or milk? 🥛',
+'早晨问候：Good morning, sunshine! ☀️ How did you sleep?','刷牙歌：Brush brush brush your teeth 🪥','洗手时唱：Wash your hands, wash wash wash','穿衣服时说：First your left arm, then your right arm','收拾玩具时：Let\'s put the toys to sleep. Good night, blocks!','出门前：Put on your shoes. Left shoe, right shoe 👟','回家后：Take off your shoes. Hang up your coat.','饭前说：Time to eat! What do you see on the table?','睡前仪式：Put on pajamas, read a book, turn off the light 🌙','表达感受：Are you feeling happy, tired, or hungry?',
+'看窗外说出看到的东西：I see a tree 🌳, a bird 🐦, the sky ☁️','捡树叶说出颜色和大小：This leaf is yellow and big','下雨天站在窗边：Rain is falling. Pitter-patter ☔','看月亮和星星：Look at the moon! Twinkle twinkle little star ⭐','浇花时：Let\'s water the flowers. They are thirsty 💐','找蚂蚁或蜗牛观察：Look, a tiny ant! It\'s so small 🐜','看云的形状：That cloud looks like a bunny! What do you see?','收衣服时说：These are your clothes. Soft and warm ☀️',
+'照镜子做表情：Show me happy 😊 sad 😢 surprised 😲','读绘本时问：How does the bunny feel? Is she happy or sad?','画表情脸谱：Let\'s draw a happy face, a sleepy face, a silly face','唱 If You\'re Happy and You Know It 改编版','睡前复盘：Today was fun! What made you happy today?','生气时教她说：I feel angry. It\'s okay to feel angry.',
+'唱 Baby Shark 加上全家版本 🦈','Twinkle Twinkle Little Star 跟谦灵一起做手势 ⭐','The Wheels on the Bus 改编大理版','Old MacDonald 让谦灵选动物你唱','Finger Family 手指一家：Daddy finger, Mommy finger...','Rain Rain Go Away 下雨天专用 ☔','Row Row Row Your Boat 面对面拉着小手划船','自己编歌：用两只老虎的调唱英文单词',
+'摸不同材质说感觉：soft, rough, smooth, bumpy','听声音猜东西：铃铛🔔 钥匙🔑 水声💧 拍手👏','闻一闻猜是什么：橙子🍊 咖啡☕ 面包🍞 花香🌸','光脚在不同地面走：carpet, floor, grass','玩水游戏：Pour the water. Splash! Float or sink?','沙子/米/豆子感官盆：Scoop, pour, dig, find treasures','吹泡泡：Blow bubbles! Big bubble, small bubble 🫧','玩橡皮泥：Roll it, squish it, make a ball, make a snake',
+'开商店：What would you like to buy? That\'s two yuan 💰','照顾娃娃：The baby is hungry. Let\'s feed her 🍼','坐火车去北京：All aboard! Choo choo! 🚂','煮饭游戏：Let\'s make soup. Put in the carrots, stir stir stir 🥕','医生游戏：The teddy bear has a tummy ache. Can you help? 🩺','打电话：Ring ring! Hello? How are you today? 📞','搭帐篷读绘本：Let\'s camp in the living room! 🔦','给小动物排队上课：Sit down, class! Today we learn colors',
+'障碍赛道：Crawl under, jump over, run to the door','扔球游戏：Throw the ball! Catch! Roll it to Mommy 🏀','模仿动物走：Crawl like a crab, hop like a frog, slide like a snake','枕头路踩平衡：Walk on the pillows without falling','打气球不落地：Don\'t let it touch the ground! 🎈',
+'袜子配对，边配边用英文说颜色和大小','让谦灵帮你找东西：Can you find Mommy\'s shoe? 👠','藏东西游戏：Where is the ball? Under the blanket? Behind the door?','What\'s missing? 放三个东西，谦灵闭眼，拿走一个让她猜','模仿秀：Copy Mommy! 做鬼脸、动作、声音','照相时间：Say cheese! Strike a pose! 📸','一个接一个：轮流说动物/颜色/食物，每人说一个','睡前数一数今天最开心的三件事：My three happy things today',
+],lover:[
+'给他发一条不为什么的消息，就三个字 💬','今天夸他一次，要具体——不是"你好棒"，是"你今天___的时候我特别感动"','跟谦灵说爸爸的好话：爸爸好厉害对不对？他会___','当着他的面跟别人夸他（假装不经意）','睡前说一个今天让你想起他的瞬间','写一张便利贴塞他口袋里：今天辛苦了','肯定他的一个决定：你那天说___，我现在越想越觉得对','录一段谦灵的小视频发给他，让他上班也能看到 👧','说一句"跟你在一起挺好的"，不用等回复','告诉他一个他教会你的东西：你上次说的___我一直记着','在他做了一件不起眼的小事时郑重地说谢谢','发语音而不是打字，让他听到你的声音 🎤',
+'帮他泡杯茶，什么都不说放在旁边 🍵','他回来前把拖鞋摆好','帮他收一件他忘了收的东西','给他削一个水果，切成小块 🍎','帮他手机上充上电 🔋','把他杯子里的水加满','帮他整理一个他拖了很久没整理的东西','早上他出门前帮他准备好要带的东西','发现他在忙的时候，默默把他手边的东西整理好','他洗完澡帮他把毛巾和干净衣服放好','他下班前把房间灯打开、空调调好','买一样他爱吃但平时不常买的东西放在桌上 🍫',
+'出门前主动抱一下（比平时多三秒）','他坐着的时候从后面搭一下他的肩膀','散步时主动牵他的手 🤝','给他揉揉肩膀（不用说话，就揉）','睡觉前给他一个认真的 kiss goodnight','看电视时靠着他坐，把头放他肩上','他看起来很累的时候，拍拍他的后背说"辛苦了"','过马路时挽一下他的手臂',
+'他说话的时候放下手机，就看着他的眼睛 👀','认真问他"今天有什么想跟我说的吗"，然后真的听','跟他一起看一部他想看的电影（不催，不刷手机）','陪他去做一件他喜欢但你不那么感兴趣的事','散步时不聊孩子不聊工作，就聊聊"你最近在想什么"','开车时主动坐副驾，帮他看导航陪他聊天','他跟你讲一件事的时候，追问一个细节','晚上孩子睡了之后，跟他说"我们再坐一会儿"','跟他一起听一首歌，什么都不说 🎵','记下他今天说的一件小事，过几天回头问他后续',
+'发一张谦灵今天的可爱照片给他，配一句有趣的话 📸','买一个他提过一次的小东西，假装不经意的给他','给谦灵穿上一件爸爸喜欢的衣服拍张照发给他','在他包里偷偷放一张谦灵的涂鸦','用谦灵的语气给他写一张小纸条，放在枕头下面','他回来的路上发消息：谦灵说想爸爸了','周末安排一个全家的惊喜小活动（不提前告诉他）','在他的自行车上挂一个小挂件 🚲','蒸一锅他喜欢的馒头/包子，等他回来刚好出锅','把他和谦灵的合照设为手机壁纸，让他"不小心"看到',
+'说出来：谢谢你最近___（填一件具体的事）','用谦灵的角度说：谦灵你知道吗，爸爸为了我们___','感谢他做的一件"应该做的"事（容易被当成理所当然的事）','记下他今天为你做的一件事，晚上告诉他你注意到了','写一个清单"老帅最近让我感动的十件事"','在吃饭前说：谢谢你今天___','跟谦灵一起画一张"谢谢爸爸"的画 🎨','他的生日或纪念日以外的日子，突然跟他说感谢','谢谢他的家人：你妈妈把你教得真好','把他做过的好事讲给别人听',
+'晚上主动说"你先休息，我来收拾" 🧹','发现他在操心一件事，问一句：我能帮你分担点什么？','今天少提一个要求——他也有累的时候','主动说"这件事我来处理，你不用管了"','帮他处理一个他一直拖着的琐事','他的家务你做一次，不邀功','跟他说：今天你什么都不用做，就当甩手掌柜','他压力大的时候说：没关系，我们一起想办法','他回家时家里是安静整洁的（哪怕只是表面整洁十分钟）','不要让他在你和孩子之间当传话筒，直接说清楚',
+'今天不说"你又..."，换成"我们可以..."','他有情绪的时候不急着给方案，先说"我听到了"','跟他分享一件今天发生的糗事或者好笑的事','告诉他一个你今天的感受（不只是事情）：我今天觉得___','吵架后先低头一次（哪怕只是递杯水）','问他一个开放式问题：如果你可以重新选一次，你最想做什么？','不打断他说话。就这一条，今天做到。','告诉他你的期待而不是抱怨：我希望我们可以___',
+'发一条朋友圈提到他（不是广告那种，就是日常里的他）','在朋友面前自然地夸他（一句话就够）','跟长辈打电话时提到他做得好的一两件事','跟谦灵说：你看爸爸多厉害！','把手机里他好看的照片设成通讯录头像','有人夸谦灵的时候说"像她爸爸"',
+'睡前跟他说一件他今天让你骄傲的事 🌙','关灯后多聊五分钟，不说正事就闲聊','说一句"有你真好"（然后就睡觉，不用展开）','给他盖一下被子','如果他先睡着，轻轻说一句晚安再睡','早上醒来第一句是夸他的：昨天你___的时候特别帅',
+'中午发：吃饭了吗？（不用聊很多，就问）','发一张中午吃的饭的照片，说"没有你做的好吃"','截图一张有趣的对话或者内容发给他','用谦灵的语气发语音：爸爸爸爸爸爸！','发一个以前甜蜜回忆的日期：还记得去年的今天我们在___吗','他在外面忙的时候发：别太累了，差不多就回来','随便分享一个今天的小发现：今天发现___，觉得你会喜欢',
+'问他单车店的事：最近车队怎么样？有什么好玩的路线？🚲','跟他说：周末你放心去骑行，谦灵我来带','主动研究一下他感兴趣的领域（哪怕百度五分钟）','他买了一个新的小装备/工具时表现出兴趣：这个怎么用？','给他一个周末半天的真自由：孩子我搞定，你想干嘛干嘛',
+'教谦灵说一句跟爸爸有关的话，让他回来听到 👧','拍谦灵模仿爸爸动作的视频发给他','告诉谦灵：爸爸小时候也___','让谦灵选一样东西送给爸爸（树叶、石头、画都可以）','跟谦灵一起在门口等爸爸回来，听到脚步声就喊"爸爸回来了"',
+'今天多给他一个微笑——什么都不为，就是看到他的时候','给他放一首他喜欢的歌 🎵','遇到一个决定的时候说：你觉得呢？我听你的。','今天克制一次"我说得对"的冲动','让他看到你在笑（不是礼貌的笑，是真的被逗笑的那种）','把他说的某句话记下来，以后引用回去：像你上次说的___',
+],verse:[
+'你们要休息，要知道我是神。— 诗篇 46:10','凡劳苦担重担的人，可以到我这里来，我就使你们得安息。— 马太福音 11:28','你们得救在乎归回安息；你们得力在乎平静安稳。— 以赛亚书 30:15','我留下平安给你们，我将我的平安赐给你们。— 约翰福音 14:27','耶和华必赐力量给他的百姓；耶和华必赐平安的福给他的百姓。— 诗篇 29:11','住在至高者隐密处的，必住在全能者的荫下。— 诗篇 91:1','你使我心里快乐，胜过那丰收五谷新酒的人。我必安然躺下睡觉。— 诗篇 4:7-8','坚心倚赖你的，你必保守他十分平安，因为他倚靠你。— 以赛亚书 26:3','神所赐出人意外的平安，必在基督耶稣里保守你们的心怀意念。— 腓立比书 4:7','但那等候耶和华的，必从新得力。他们必如鹰展翅上腾。— 以赛亚书 40:31',
+'爱是恒久忍耐，又有恩慈；爱是不嫉妒，爱是不自夸，不张狂。— 哥林多前书 13:4','我们爱，因为神先爱我们。— 约翰一书 4:19','如今常存的有信，有望，有爱；这三样，其中最大的是爱。— 哥林多前书 13:13','你们愿意人怎样待你们，你们也要怎样待人。— 马太福音 7:12','爱人不可虚假；恶要厌恶，善要亲近。爱弟兄，要彼此亲热。— 罗马书 12:9-10','最要紧的是彼此切实相爱，因为爱能遮掩许多的罪。— 彼得前书 4:8','亲爱的弟兄啊，我们应当彼此相爱，因为爱是从神来的。— 约翰一书 4:7','凡事谦虚、温柔、忍耐，用爱心互相宽容。— 以弗所书 4:2','你要尽心、尽性、尽意、尽力爱主你的神。其次就是说：要爱人如己。— 马可福音 12:30-31','我赐给你们一条新命令，乃是叫你们彼此相爱。— 约翰福音 13:34',
+'你要专心仰赖耶和华，不可倚靠自己的聪明。— 箴言 3:5','信就是所望之事的实底，是未见之事的确据。— 希伯来书 11:1','耶和华是我的牧者，我必不至缺乏。— 诗篇 23:1','耶和华必在你前面行，他必与你同在，必不撇下你，也不丢弃你。— 申命记 31:8','我将耶和华常摆在我面前，因他在我右边，我便不至摇动。— 诗篇 16:8','你当默然倚靠耶和华，耐性等候他。— 诗篇 37:7','神是我们的避难所，是我们的力量，是我们在患难中随时的帮助。— 诗篇 46:1','你们要将一切的忧虑卸给神，因为他顾念你们。— 彼得前书 5:7','你若信，就必看见神的荣耀。— 约翰福音 11:40','在人这是不能的，在神凡事都能。— 马太福音 19:26',
+'我靠着那加给我力量的，凡事都能做。— 腓立比书 4:13','疲乏的，他赐能力；软弱的，他加力量。— 以赛亚书 40:29','我的恩典够你用的，因为我的能力是在人的软弱上显得完全。— 哥林多后书 12:9','所以，你们不可丢弃勇敢的心；存这样的心必得大赏赐。— 希伯来书 10:35','你们务要警醒，在真道上站立得稳，要作大丈夫，要刚强。— 哥林多前书 16:13','因为神赐给我们，不是胆怯的心，乃是刚强、仁爱、谨守的心。— 提摩太后书 1:7','所以，我更喜欢夸自己的软弱，好叫基督的能力覆庇我。— 哥林多后书 12:9','但那等候耶和华的，必从新得力。— 以赛亚书 40:31',
+'你的话是我脚前的灯，是我路上的光。— 诗篇 119:105','敬畏耶和华是智慧的开端；认识至圣者便是聪明。— 箴言 9:10','你要保守你心，胜过保守一切，因为一生的果效是由心发出。— 箴言 4:23','你们中间若有缺少智慧的，应当求那厚赐与众人、也不斥责人的神。— 雅各书 1:5','不要效法这个世界，只要心意更新而变化。— 罗马书 12:2','人心筹算自己的道路；惟耶和华指引他的脚步。— 箴言 16:9','求你指教我们怎样数算自己的日子，好叫我们得着智慧的心。— 诗篇 90:12','因为耶和华赐人智慧；知识和聪明都由他口而出。— 箴言 2:6','你所做的，要交托耶和华，你所谋的，就必成立。— 箴言 16:3','所以凡听见我这话就去行的，好比一个聪明人把房子盖在磐石上。— 马太福音 7:24',
+'喜乐的心乃是良药；忧伤的灵使骨枯干。— 箴言 17:22','要常常喜乐，不住地祷告，凡事谢恩。— 帖撒罗尼迦前书 5:16-18','你们要靠主常常喜乐。我再说，你们要喜乐。— 腓立比书 4:4','这是耶和华所定的日子，我们在其中要高兴欢喜。— 诗篇 118:24','凡以感谢献上为祭的便是荣耀我。— 诗篇 50:23','我的心哪，你要称颂耶和华，不可忘记他的一切恩惠。— 诗篇 103:2','应当称谢耶和华，因他本为善，他的慈爱永远长存。— 历代志上 16:34','你们要称谢耶和华，求告他的名，在万民中传扬他的作为。— 诗篇 105:1',
+'耶和华说：我知道我向你们所怀的意念是赐平安的意念。— 耶利米书 29:11','我们晓得万事都互相效力，叫爱神的人得益处。— 罗马书 8:28','因为他的怒气不过是转眼之间；他的恩典乃是一生之久。— 诗篇 30:5','一宿虽然有哭泣，早晨便必欢呼。— 诗篇 30:5','所以你们该彼此劝慰，互相建立。— 帖撒罗尼迦前书 5:11','神若帮助我们，谁能敌挡我们呢？— 罗马书 8:31','压伤的芦苇，他不折断；将残的灯火，他不吹灭。— 马太福音 12:20','我们行善，不可丧志；若不灰心，到了时候就要收成。— 加拉太书 6:9',
+'你们饶恕人的过犯，你们的天父也必饶恕你们的过犯。— 马太福音 6:14','并要以恩慈相待，存怜悯的心，彼此饶恕。— 以弗所书 4:32','因为世人都犯了罪，亏缺了神的荣耀；如今却蒙神的恩典，就白白地称义。— 罗马书 3:23-24','你们得救是本乎恩，也因着信；这并不是出于自己，乃是神所赐的。— 以弗所书 2:8','主啊，你本为良善，乐意饶恕人，有丰盛的慈爱。— 诗篇 86:5','倘若这人与那人有嫌隙，总要彼此包容，彼此饶恕。— 歌罗西书 3:13',
+'应当一无挂虑，只要凡事借着祷告、祈求和感谢，将你们所要的告诉神。— 腓立比书 4:6','你们祈求，就给你们；寻找，就寻见；叩门，就给你们开门。— 马太福音 7:7','你们亲近神，神就必亲近你们。— 雅各书 4:8','你祷告的时候，要进你的内屋，关上门，祷告你在暗中的父。— 马太福音 6:6','义人祈祷所发的力量是大有功效的。— 雅各书 5:16','你们若常在我里面，我的话也常在你们里面，凡你们所愿意的，祈求就给你们成就。— 约翰福音 15:7','况且，我们的软弱有圣灵帮助；我们本不晓得当怎样祷告。— 罗马书 8:26','次日早晨，天未亮的时候，耶稣起来，到旷野地方去，在那里祷告。— 马可福音 1:35',
+'无论做什么，都要从心里做，像是给主做的，不是给人做的。— 歌罗西书 3:23','身体没有灵魂是死的，信心没有行为也是死的。— 雅各书 2:26','你们的光也当这样照在人前，叫他们看见你们的好行为。— 马太福音 5:16','因为人子来，并不是要受人的服事，乃是要服事人。— 马可福音 10:45','各人要照所得的恩赐彼此服事。— 彼得前书 4:10','所以，有了机会就当向众人行善。— 加拉太书 6:10',
+'儿女是耶和华所赐的产业；所怀的胎是他所给的赏赐。— 诗篇 127:3','教养孩童，使他走当行的道，就是到老他也不偏离。— 箴言 22:6','你们作父亲的，不要惹儿女的气，只要照着主的教训和警戒养育他们。— 以弗所书 6:4','至于我和我家，我们必定事奉耶和华。— 约书亚记 24:15','才德的妇人是丈夫的冠冕。— 箴言 12:4','她的儿女起来称她有福，她的丈夫也称赞她。— 箴言 31:28',
+'我岂没有吩咐你吗？你当刚强壮胆！不要惧怕，也不要惊惶。— 约书亚记 1:9','你不要害怕，因为我与你同在；不要惊惶，因为我是你的神。— 以赛亚书 41:10','耶和华是我的亮光，是我的拯救，我还怕谁呢？— 诗篇 27:1','你们当刚强壮胆，不要害怕，也不要畏惧他们。— 申命记 31:6','我虽然行过死荫的幽谷，也不怕遭害，因为你与我同在。— 诗篇 23:4','因为神赐给我们，不是胆怯的心，乃是刚强、仁爱、谨守的心。— 提摩太后书 1:7',
+'温柔的人有福了，因为他们必承受地土。— 马太福音 5:5','凡事不可结党，不可贪图虚浮的荣耀；只要存心谦卑，各人看别人比自己强。— 腓立比书 2:3','神阻挡骄傲的人，赐恩给谦卑的人。— 雅各书 4:6','所以，你们要存怜悯、恩慈、谦虚、温柔、忍耐的心。— 歌罗西书 3:12','我心里柔和谦卑，你们当负我的轭，学我的样式。— 马太福音 11:29',
+'我无论在什么景况都可以知足，这是我已经学会了。— 腓立比书 4:11','敬虔加上知足的心便是大利了。— 提摩太前书 6:6','你们存心不可贪爱钱财，要以自己所有的为足。— 希伯来书 13:5','求你使我也不贫穷也不富足，赐给我需用的饮食。— 箴言 30:8','所以不要为明天忧虑，因为明天自有明天的忧虑。— 马太福音 6:34',
+'我要称谢你，因我受造奇妙可畏。— 诗篇 139:14','你必将生命的道路指示我。在你面前有满足的喜乐。— 诗篇 16:11','以耶和华为神的，那国是有福的。— 诗篇 33:12','你们要尝尝主恩的滋味，便知道他是美善。— 诗篇 34:8','他赦免你的一切罪孽，医治你的一切疾病。— 诗篇 103:3',
+'所以，你们或吃或喝，无论做什么，都要为荣耀神而行。— 哥林多前书 10:31','人活着，不是单靠食物，乃是靠神口里所出的一切话。— 马太福音 4:4','道成了肉身，住在我们中间，充充满满地有恩典有真理。— 约翰福音 1:14','耶稣说：我就是道路、真理、生命。— 约翰福音 14:6','愿主耶稣基督的恩惠、神的慈爱、圣灵的感动，常与你们众人同在。— 哥林多后书 13:14',
+]};
 
-  // ---- 爱人小事：105条 ----
-  lover: [
-    // 言语肯定（12条）
-    '给他发一条不为什么的消息，就三个字 💬',
-    '今天夸他一次，要具体——不是"你好棒"，是"你今天___的时候我特别感动"',
-    '跟谦灵说爸爸的好话：爸爸好厉害对不对？他会___',
-    '当着他的面跟别人夸他（假装不经意）',
-    '睡前说一个今天让你想起他的瞬间',
-    '写一张便利贴塞他口袋里：今天辛苦了',
-    '肯定他的一个决定：你那天说___，我现在越想越觉得对',
-    '录一段谦灵的小视频发给他，让他上班也能看到 👧',
-    '说一句"跟你在一起挺好的"，不用等回复',
-    '告诉他一个他教会你的东西：你知道吗，你上次说的___我一直记着',
-    '在他做了一件不起眼的小事时郑重地说谢谢',
-    '发语音而不是打字，让他听到你的声音 🎤',
-    // 服务行动（12条）
-    '帮他泡杯茶，什么都不说放在旁边 🍵',
-    '他回来前把拖鞋摆好',
-    '帮他收一件他忘了收的东西',
-    '给他削一个水果，切成小块 🍎',
-    '帮他手机上充上电 🔋',
-    '把他杯子里的水加满',
-    '帮他整理一个他拖了很久没整理的东西',
-    '早上他出门前帮他准备好要带的东西',
-    '发现他在忙的时候，默默把他手边的东西整理好',
-    '他洗完澡帮他把毛巾和干净衣服放好',
-    '他下班前把房间灯打开、空调调好',
-    '买一样他爱吃但平时不常买的东西放在桌上 🍫',
-    // 身体接触（8条）
-    '出门前主动抱一下（比平时多三秒）',
-    '他坐着的时候从后面搭一下他的肩膀',
-    '散步时主动牵他的手 🤝',
-    '给他揉揉肩膀（不用说话，就揉）',
-    '睡觉前给他一个认真的 kiss goodnight',
-    '看电视时靠着他坐，把头放他肩上',
-    '他看起来很累的时候，拍拍他的后背说"辛苦了"',
-    '过马路时挽一下他的手臂',
-    // 专注陪伴（10条）
-    '他说话的时候放下手机，就看着他的眼睛 👀',
-    '认真问他"今天有什么想跟我说的吗"，然后真的听',
-    '跟他一起看一部他想看的电影（不催，不刷手机）',
-    '陪他去做一件他喜欢但你不那么感兴趣的事',
-    '散步时不聊孩子不聊工作，就聊聊"你最近在想什么"',
-    '开车时主动坐副驾，帮他看导航陪他聊天',
-    '他跟你讲一件事的时候，追问一个细节',
-    '晚上孩子睡了之后，跟他说"我们再坐一会儿"',
-    '跟他一起听一首歌，什么都不说 🎵',
-    '记下他今天说的一件小事，过几天回头问他后续',
-    // 小惊喜（10条）
-    '发一张谦灵今天的可爱照片给他，配一句有趣的话 📸',
-    '买一个他提过一次的小东西，假装不经意的给他',
-    '给谦灵穿上一件爸爸喜欢的衣服拍张照发给他',
-    '在他包里偷偷放一张谦灵的涂鸦',
-    '用谦灵的语气给他写一张小纸条，放在枕头下面',
-    '他回来的路上发消息：谦灵说想爸爸了',
-    '周末安排一个全家的惊喜小活动（不提前告诉他）',
-    '在他的自行车上挂一个小挂件（不用说，让他自己发现）🚲',
-    '蒸一锅他喜欢的馒头/包子，等他回来刚好出锅',
-    '把他和谦灵的合照设为手机壁纸，让他"不小心"看到',
-    // 感恩表达（10条）
-    '说出来：谢谢你最近___（填一件具体的事，越具体越好）',
-    '用谦灵的角度说：谦灵你知道吗，爸爸为了我们___',
-    '感谢他做的一件"应该做的"事（那些容易被当成理所当然的事）',
-    '记下他今天为你做的一件事，晚上告诉他你注意到了',
-    '写一个清单"老帅最近让我感动的十件事"（不用给他看，写给自己，但心态会变）',
-    '在吃饭前说：谢谢你今天___',
-    '跟谦灵一起画一张"谢谢爸爸"的画 🎨',
-    '他的生日或纪念日以外的日子，突然跟他说感谢',
-    '谢谢他的家人：你妈妈把你教得真好',
-    '把他做过的好事讲给别人听（他不在场也行，在场更好）',
-    // 分担减负（10条）
-    '晚上主动说"你先休息，我来收拾" 🧹',
-    '发现他在操心一件事，问一句：我能帮你分担点什么？',
-    '今天少提一个要求——他也有累的时候',
-    '主动说"这件事我来处理，你不用管了"',
-    '帮他处理一个他一直拖着的琐事',
-    '他的家务你做一次，不邀功',
-    '跟他说：今天你什么都不用做，就当甩手掌柜',
-    '他压力大的时候说：没关系，我们一起想办法',
-    '他回家时家里是安静整洁的（哪怕只是表面整洁十分钟）',
-    '不要让他在你和孩子之间当传话筒，直接说清楚',
-    // 沟通倾听（8条）
-    '今天不说"你又..."，换成"我们可以..."',
-    '他有情绪的时候不急着给方案，先说"我听到了"',
-    '跟他分享一件今天发生的糗事或者好笑的事',
-    '告诉他一个你今天的感受（不只是事情）：我今天觉得___',
-    '吵架后先低头一次（哪怕只是递杯水）',
-    '问他一个开放式问题：如果你可以重新选一次，你最想做什么？',
-    '不打断他说话。就这一条，今天做到。',
-    '告诉他你的期待而不是抱怨：我希望我们可以___',
-    // 公开认可（6条）
-    '发一条朋友圈提到他（不是广告那种，就是日常里的他）',
-    '在朋友面前自然地夸他（不用刻意，一句话就够）',
-    '跟长辈打电话时提到他做得好的一两件事',
-    '跟谦灵说：你看爸爸多厉害！',
-    '把手机里他好看的照片设成通讯录头像',
-    '有人夸谦灵的时候说"像她爸爸"',
-    // 睡前仪式（6条）
-    '睡前跟他说一件他今天让你骄傲的事 🌙',
-    '关灯后多聊五分钟，不说正事就闲聊',
-    '说一句"有你真好"（然后就睡觉，不用展开）',
-    '给他盖一下被子',
-    '如果他先睡着，轻轻说一句晚安再睡',
-    '早上醒来第一句是夸他的：昨天你___的时候特别帅',
-    // 文字消息（7条）
-    '中午发：吃饭了吗？（不用聊很多，就问）',
-    '发一张中午吃的饭的照片，说"没有你做的好吃"',
-    '截图一张有趣的对话或者内容发给他',
-    '用谦灵的语气发语音：爸爸爸爸爸爸！',
-    '发一个以前甜蜜回忆的日期：还记得去年的今天我们在___吗',
-    '他在外面忙的时候发：别太累了，差不多就回来',
-    '随便分享一个今天的小发现：今天发现___，觉得你会喜欢',
-    // 支持兴趣（5条）
-    '问他单车店/车队的事：最近车队怎么样？有什么好玩的路线？🚲',
-    '跟他说：周末你放心去骑行，谦灵我来带',
-    '主动研究一下他感兴趣的领域（哪怕只是百度五分钟）',
-    '他买了一个新的小装备/工具时表现出兴趣：这个怎么用？',
-    '给他一个周末半天的真自由：孩子我搞定，你想干嘛干嘛',
-    // 谦灵+爸爸联结（5条）
-    '教谦灵说一句跟爸爸有关的话，让他回来听到 👧',
-    '拍谦灵模仿爸爸动作的视频发给他',
-    '告诉谦灵：爸爸小时候也___',
-    '让谦灵选一样东西送给爸爸（树叶、石头、画都可以）',
-    '跟谦灵一起在门口等爸爸回来，听到脚步声就喊"爸爸回来了"',
-    // 额外（6条）
-    '今天多给他一个微笑——什么都不为，就是看到他的时候',
-    '给他放一首他喜欢的歌 🎵',
-    '遇到一个决定的时候说：你觉得呢？我听你的。',
-    '今天克制一次"我说得对"的冲动',
-    '让他看到你在笑（不是礼貌的笑，是真的被逗笑的那种）',
-    '把他说的某句话记下来，以后引用回去：像你上次说的___',
-  ],
+// ==================== State ====================
+const SK='ls-v3',HK='ls-hist-v3';
+function ld(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r)}catch(e){}return{pools:null,locked:{},todayRoll:null}}
+function sd(d){try{localStorage.setItem(SK,JSON.stringify(d))}catch(e){}}
+function lh(){try{const r=localStorage.getItem(HK);if(r)return JSON.parse(r)}catch(e){}return[]}
+function sh(r){try{localStorage.setItem(HK,JSON.stringify(r))}catch(e){}}
 
-  // ---- 经文：110条 ----
-  verse: [
-    // 安息与平安（10条）
-    '你们要休息，要知道我是神。— 诗篇 46:10',
-    '凡劳苦担重担的人，可以到我这里来，我就使你们得安息。— 马太福音 11:28',
-    '你们得救在乎归回安息；你们得力在乎平静安稳。— 以赛亚书 30:15',
-    '我留下平安给你们，我将我的平安赐给你们。— 约翰福音 14:27',
-    '耶和华必赐力量给他的百姓；耶和华必赐平安的福给他的百姓。— 诗篇 29:11',
-    '住在至高者隐密处的，必住在全能者的荫下。— 诗篇 91:1',
-    '你使我心里快乐，胜过那丰收五谷新酒的人。我必安然躺下睡觉。— 诗篇 4:7-8',
-    '坚心倚赖你的，你必保守他十分平安，因为他倚靠你。— 以赛亚书 26:3',
-    '神所赐出人意外的平安，必在基督耶稣里保守你们的心怀意念。— 腓立比书 4:7',
-    '但那等候耶和华的，必从新得力。他们必如鹰展翅上腾。— 以赛亚书 40:31',
-    // 爱与关系（10条）
-    '爱是恒久忍耐，又有恩慈；爱是不嫉妒，爱是不自夸，不张狂。— 哥林多前书 13:4',
-    '我们爱，因为神先爱我们。— 约翰一书 4:19',
-    '如今常存的有信，有望，有爱；这三样，其中最大的是爱。— 哥林多前书 13:13',
-    '你们愿意人怎样待你们，你们也要怎样待人。— 马太福音 7:12',
-    '爱人不可虚假；恶要厌恶，善要亲近。爱弟兄，要彼此亲热。— 罗马书 12:9-10',
-    '最要紧的是彼此切实相爱，因为爱能遮掩许多的罪。— 彼得前书 4:8',
-    '亲爱的弟兄啊，我们应当彼此相爱，因为爱是从神来的。— 约翰一书 4:7',
-    '凡事谦虚、温柔、忍耐，用爱心互相宽容。— 以弗所书 4:2',
-    '你要尽心、尽性、尽意、尽力爱主你的神。其次就是说：要爱人如己。— 马可福音 12:30-31',
-    '我赐给你们一条新命令，乃是叫你们彼此相爱。— 约翰福音 13:34',
-    // 信心与信靠（10条）
-    '你要专心仰赖耶和华，不可倚靠自己的聪明。— 箴言 3:5',
-    '信就是所望之事的实底，是未见之事的确据。— 希伯来书 11:1',
-    '耶和华是我的牧者，我必不至缺乏。— 诗篇 23:1',
-    '耶和华必在你前面行，他必与你同在，必不撇下你，也不丢弃你。— 申命记 31:8',
-    '我将耶和华常摆在我面前，因他在我右边，我便不至摇动。— 诗篇 16:8',
-    '你当默然倚靠耶和华，耐性等候他。— 诗篇 37:7',
-    '神是我们的避难所，是我们的力量，是我们在患难中随时的帮助。— 诗篇 46:1',
-    '你们要将一切的忧虑卸给神，因为他顾念你们。— 彼得前书 5:7',
-    '你若信，就必看见神的荣耀。— 约翰福音 11:40',
-    '在人这是不能的，在神凡事都能。— 马太福音 19:26',
-    // 力量与坚持（8条）
-    '我靠着那加给我力量的，凡事都能做。— 腓立比书 4:13',
-    '疲乏的，他赐能力；软弱的，他加力量。— 以赛亚书 40:29',
-    '我的恩典够你用的，因为我的能力是在人的软弱上显得完全。— 哥林多后书 12:9',
-    '所以，你们不可丢弃勇敢的心；存这样的心必得大赏赐。— 希伯来书 10:35',
-    '你们务要警醒，在真道上站立得稳，要作大丈夫，要刚强。— 哥林多前书 16:13',
-    '但那等候耶和华的，必从新得力。— 以赛亚书 40:31',
-    '因为神赐给我们，不是胆怯的心，乃是刚强、仁爱、谨守的心。— 提摩太后书 1:7',
-    '所以，我更喜欢夸自己的软弱，好叫基督的能力覆庇我。— 哥林多后书 12:9',
-    // 智慧与指引（10条）
-    '你的话是我脚前的灯，是我路上的光。— 诗篇 119:105',
-    '敬畏耶和华是智慧的开端；认识至圣者便是聪明。— 箴言 9:10',
-    '你要保守你心，胜过保守一切，因为一生的果效是由心发出。— 箴言 4:23',
-    '你们中间若有缺少智慧的，应当求那厚赐与众人、也不斥责人的神。— 雅各书 1:5',
-    '不要效法这个世界，只要心意更新而变化。— 罗马书 12:2',
-    '人心筹算自己的道路；惟耶和华指引他的脚步。— 箴言 16:9',
-    '求你指教我们怎样数算自己的日子，好叫我们得着智慧的心。— 诗篇 90:12',
-    '因为耶和华赐人智慧；知识和聪明都由他口而出。— 箴言 2:6',
-    '你所做的，要交托耶和华，你所谋的，就必成立。— 箴言 16:3',
-    '所以凡听见我这话就去行的，好比一个聪明人把房子盖在磐石上。— 马太福音 7:24',
-    // 喜乐与感恩（8条）
-    '喜乐的心乃是良药；忧伤的灵使骨枯干。— 箴言 17:22',
-    '要常常喜乐，不住地祷告，凡事谢恩。— 帖撒罗尼迦前书 5:16-18',
-    '你们要靠主常常喜乐。我再说，你们要喜乐。— 腓立比书 4:4',
-    '这是耶和华所定的日子，我们在其中要高兴欢喜。— 诗篇 118:24',
-    '凡以感谢献上为祭的便是荣耀我。— 诗篇 50:23',
-    '我的心哪，你要称颂耶和华，不可忘记他的一切恩惠。— 诗篇 103:2',
-    '应当称谢耶和华，因他本为善，他的慈爱永远长存。— 历代志上 16:34',
-    '你们要称谢耶和华，求告他的名，在万民中传扬他的作为。— 诗篇 105:1',
-    // 盼望与鼓励（8条）
-    '耶和华说：我知道我向你们所怀的意念是赐平安的意念，要叫你们末后有指望。— 耶利米书 29:11',
-    '我们晓得万事都互相效力，叫爱神的人得益处。— 罗马书 8:28',
-    '因为他的怒气不过是转眼之间；他的恩典乃是一生之久。— 诗篇 30:5',
-    '一宿虽然有哭泣，早晨便必欢呼。— 诗篇 30:5',
-    '所以你们该彼此劝慰，互相建立。— 帖撒罗尼迦前书 5:11',
-    '神若帮助我们，谁能敌挡我们呢？— 罗马书 8:31',
-    '压伤的芦苇，他不折断；将残的灯火，他不吹灭。— 马太福音 12:20',
-    '我们行善，不可丧志；若不灰心，到了时候就要收成。— 加拉太书 6:9',
-    // 恩典与饶恕（6条）
-    '你们饶恕人的过犯，你们的天父也必饶恕你们的过犯。— 马太福音 6:14',
-    '并要以恩慈相待，存怜悯的心，彼此饶恕，正如神在基督里饶恕了你们一样。— 以弗所书 4:32',
-    '因为世人都犯了罪，亏缺了神的荣耀；如今却蒙神的恩典，因基督耶稣的救赎，就白白地称义。— 罗马书 3:23-24',
-    '你们得救是本乎恩，也因着信；这并不是出于自己，乃是神所赐的。— 以弗所书 2:8',
-    '主啊，你本为良善，乐意饶恕人，有丰盛的慈爱赐给凡求告你的人。— 诗篇 86:5',
-    '倘若这人与那人有嫌隙，总要彼此包容，彼此饶恕。— 歌罗西书 3:13',
-    // 祷告与亲近神（8条）
-    '应当一无挂虑，只要凡事借着祷告、祈求和感谢，将你们所要的告诉神。— 腓立比书 4:6',
-    '你们祈求，就给你们；寻找，就寻见；叩门，就给你们开门。— 马太福音 7:7',
-    '你们亲近神，神就必亲近你们。— 雅各书 4:8',
-    '你祷告的时候，要进你的内屋，关上门，祷告你在暗中的父。— 马太福音 6:6',
-    '义人祈祷所发的力量是大有功效的。— 雅各书 5:16',
-    '你们若常在我里面，我的话也常在你们里面，凡你们所愿意的，祈求就给你们成就。— 约翰福音 15:7',
-    '况且，我们的软弱有圣灵帮助；我们本不晓得当怎样祷告。— 罗马书 8:26',
-    '次日早晨，天未亮的时候，耶稣起来，到旷野地方去，在那里祷告。— 马可福音 1:35',
-    // 服事与行动（6条）
-    '无论做什么，都要从心里做，像是给主做的，不是给人做的。— 歌罗西书 3:23',
-    '身体没有灵魂是死的，信心没有行为也是死的。— 雅各书 2:26',
-    '你们的光也当这样照在人前，叫他们看见你们的好行为。— 马太福音 5:16',
-    '因为人子来，并不是要受人的服事，乃是要服事人。— 马可福音 10:45',
-    '各人要照所得的恩赐彼此服事，作神百般恩赐的好管家。— 彼得前书 4:10',
-    '所以，有了机会就当向众人行善。— 加拉太书 6:10',
-    // 家庭与儿女（6条）
-    '儿女是耶和华所赐的产业；所怀的胎是他所给的赏赐。— 诗篇 127:3',
-    '教养孩童，使他走当行的道，就是到老他也不偏离。— 箴言 22:6',
-    '你们作父亲的，不要惹儿女的气，只要照着主的教训和警戒养育他们。— 以弗所书 6:4',
-    '至于我和我家，我们必定事奉耶和华。— 约书亚记 24:15',
-    '才德的妇人是丈夫的冠冕。— 箴言 12:4',
-    '她的儿女起来称她有福，她的丈夫也称赞她。— 箴言 31:28',
-    // 勇气与无畏（6条）
-    '我岂没有吩咐你吗？你当刚强壮胆！不要惧怕，也不要惊惶。— 约书亚记 1:9',
-    '因为神赐给我们，不是胆怯的心，乃是刚强、仁爱、谨守的心。— 提摩太后书 1:7',
-    '你不要害怕，因为我与你同在；不要惊惶，因为我是你的神。— 以赛亚书 41:10',
-    '耶和华是我的亮光，是我的拯救，我还怕谁呢？— 诗篇 27:1',
-    '你们当刚强壮胆，不要害怕，也不要畏惧他们。— 申命记 31:6',
-    '我虽然行过死荫的幽谷，也不怕遭害，因为你与我同在。— 诗篇 23:4',
-    // 谦卑与温柔（5条）
-    '温柔的人有福了，因为他们必承受地土。— 马太福音 5:5',
-    '凡事不可结党，不可贪图虚浮的荣耀；只要存心谦卑，各人看别人比自己强。— 腓立比书 2:3',
-    '神阻挡骄傲的人，赐恩给谦卑的人。— 雅各书 4:6',
-    '所以，你们既……是圣洁蒙爱的人，就要存怜悯、恩慈、谦虚、温柔、忍耐的心。— 歌罗西书 3:12',
-    '我心里柔和谦卑，你们当负我的轭，学我的样式。— 马太福音 11:29',
-    // 知足与满足（5条）
-    '我并不是因缺乏说这话；我无论在什么景况都可以知足，这是我已经学会了。— 腓立比书 4:11',
-    '敬虔加上知足的心便是大利了。— 提摩太前书 6:6',
-    '你们存心不可贪爱钱财，要以自己所有的为足。— 希伯来书 13:5',
-    '求你使虚假和谎言远离我；使我也不贫穷也不富足，赐给我需用的饮食。— 箴言 30:8',
-    '所以不要为明天忧虑，因为明天自有明天的忧虑。— 马太福音 6:34',
-    // 诗篇精选（5条）
-    '我要称谢你，因我受造奇妙可畏。— 诗篇 139:14',
-    '你必将生命的道路指示我。在你面前有满足的喜乐。— 诗篇 16:11',
-    '以耶和华为神的，那国是有福的。— 诗篇 33:12',
-    '你们要尝尝主恩的滋味，便知道他是美善。— 诗篇 34:8',
-    '他赦免你的一切罪孽，医治你的一切疾病。— 诗篇 103:3',
-    // 额外（5条）
-    '所以，你们或吃或喝，无论做什么，都要为荣耀神而行。— 哥林多前书 10:31',
-    '人活着，不是单靠食物，乃是靠神口里所出的一切话。— 马太福音 4:4',
-    '道成了肉身，住在我们中间，充充满满地有恩典有真理。— 约翰福音 1:14',
-    '耶稣说：我就是道路、真理、生命。— 约翰福音 14:6',
-    '愿主耶稣基督的恩惠、神的慈爱、圣灵的感动，常与你们众人同在。— 哥林多后书 13:14',
-  ],
-};
-
-// ==================== 状态 ====================
-const STORAGE_KEY = 'linggan-shaizi-v2';
-const HISTORY_KEY = 'linggan-shaizi-history-v2';
-
-function loadData(){try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}return {pools:null,locked:{},todayRoll:null}}
-function saveData(d){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}catch(e){}}
-function loadHistory(){try{const r=localStorage.getItem(HISTORY_KEY);if(r)return JSON.parse(r);}catch(e){}return[]}
-function saveHistory(r){try{localStorage.setItem(HISTORY_KEY,JSON.stringify(r));}catch(e){}}
-
-let data=loadData();
+let data=ld();
 let pools=data.pools?{...DEFAULT_POOLS,...data.pools}:{...DEFAULT_POOLS};
 let locked=data.locked||{qianling:false,lover:false,verse:false};
-let history=loadHistory();
-let isRolling=false;
+let history=lh();
+let flipped={qianling:false,lover:false,verse:false};
 let currentResults={qianling:'',lover:'',verse:''};
+let isAnimating=false;
 
 // ==================== DOM ====================
-const $q=document.getElementById('contentQianling');
-const $l=document.getElementById('contentLover');
-const $v=document.getElementById('contentVerse');
-const $cQ=document.getElementById('cardQianling');
-const $cL=document.getElementById('cardLover');
-const $cV=document.getElementById('cardVerse');
-const $lQ=document.getElementById('lockQianling');
-const $lL=document.getElementById('lockLover');
-const $lV=document.getElementById('lockVerse');
-const $btn=document.getElementById('rollBtn');
+const els={
+  text:{qianling:document.getElementById('textQianling'),lover:document.getElementById('textLover'),verse:document.getElementById('textVerse')},
+  inner:{qianling:document.getElementById('cardInnerQianling'),lover:document.getElementById('cardInnerLover'),verse:document.getElementById('cardInnerVerse')},
+  lockDot:{qianling:document.getElementById('lockDotQianling'),lover:document.getElementById('lockDotLover'),verse:document.getElementById('lockDotVerse')},
+};
 const $date=document.getElementById('dateDisplay');
+const $reset=document.getElementById('resetBtn');
 
-// ==================== 工具 ====================
+// ==================== Utils ====================
 function rand(a){return a[Math.floor(Math.random()*a.length)]}
 function todayKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
-// ==================== 日期 ====================
-(function updateDate(){
-  const n=new Date();
-  const ws=['周日','周一','周二','周三','周四','周五','周六'];
+// ==================== Date ====================
+(function(){
+  const n=new Date();const ws=['周日','周一','周二','周三','周四','周五','周六'];
   $date.textContent=`${n.getFullYear()}年${n.getMonth()+1}月${n.getDate()}日　${ws[n.getDay()]}`;
 })();
 
-// ==================== 锁定 ====================
-function updateLockUI(){
-  $lQ.className='card-lock'+(locked.qianling?' locked':'');
-  $lL.className='card-lock'+(locked.lover?' locked':'');
-  $lV.className='card-lock'+(locked.verse?' locked':'');
+// ==================== Lock dots ====================
+function updateLockDots(){
+  els.lockDot.qianling.className='front-lock'+(locked.qianling?' active':'');
+  els.lockDot.lover.className='front-lock'+(locked.lover?' active':'');
+  els.lockDot.verse.className='front-lock'+(locked.verse?' active':'');
 }
-updateLockUI();
-function toggleLock(cat){locked[cat]=!locked[cat];updateLockUI();data.locked=locked;saveData(data)}
-$lQ.addEventListener('click',e=>{e.stopPropagation();toggleLock('qianling')});
-$lL.addEventListener('click',e=>{e.stopPropagation();toggleLock('lover')});
-$lV.addEventListener('click',e=>{e.stopPropagation();toggleLock('verse')});
+updateLockDots();
 
-// ==================== 动画 ====================
-function animateCard($el,finalText,pool,dur=700){
+// ==================== Slot machine text animation ====================
+function animateText($el,finalText,pool,dur=650){
   return new Promise(resolve=>{
-    const steps=12;let step=0;
+    const steps=10;let step=0;
     function next(){
       if(step>=steps){$el.textContent=finalText;resolve();return}
       let t;do{t=rand(pool)}while(t===$el.textContent&&pool.length>1);
       $el.textContent=t;step++;
-      const delay=25+Math.pow(step/steps,3)*180;
+      const delay=20+Math.pow(step/steps,3)*160;
       setTimeout(next,delay);
     }
     next();
   });
 }
 
-// ==================== 摇 ====================
-async function roll(){
-  if(isRolling)return;isRolling=true;$btn.disabled=true;
+// ==================== Flip card ====================
+async function flipCard(cat){
+  if(isAnimating||flipped[cat]||locked[cat])return;
+  isAnimating=true;
 
-  if(!locked.qianling)currentResults.qianling=rand(pools.qianling);
-  if(!locked.lover)currentResults.lover=rand(pools.lover);
-  if(!locked.verse)currentResults.verse=rand(pools.verse);
+  // Pick result
+  currentResults[cat]=rand(pools[cat]);
 
-  const anims=[];
-  if(!locked.qianling){$cQ.classList.add('rolling');anims.push(animateCard($q,currentResults.qianling,pools.qianling))}
-  if(!locked.lover){$cL.classList.add('rolling');anims.push(animateCard($l,currentResults.lover,pools.lover))}
-  if(!locked.verse){$cV.classList.add('rolling');anims.push(animateCard($v,currentResults.verse,pools.verse))}
-  await Promise.all(anims);
+  // Flip
+  els.inner[cat].classList.add('flipped');
+  await sleep(400);
 
-  $cQ.classList.remove('rolling');$cL.classList.remove('rolling');$cV.classList.remove('rolling');
-  $cQ.classList.add('settled');$cL.classList.add('settled');$cV.classList.add('settled');
-  setTimeout(()=>{$cQ.classList.remove('settled');$cL.classList.remove('settled');$cV.classList.remove('settled')},350);
+  // Animate text
+  await animateText(els.text[cat],currentResults[cat],pools[cat]);
 
-  playDing();
+  flipped[cat]=true;
+  playClick();
 
-  const today=todayKey();
-  history.unshift({date:today,time:new Date().toISOString(),results:{...currentResults}});
-  if(history.length>200)history.length=200;
-  saveHistory(history);
-  data.todayRoll=today;saveData(data);
+  // Check all flipped
+  if(flipped.qianling&&flipped.lover&&flipped.verse){spawnSparkles();playDing()}
 
-  isRolling=false;$btn.disabled=false;
+  // Save to history if all flipped
+  if(flipped.qianling&&flipped.lover&&flipped.verse){
+    const today=todayKey();
+    history.unshift({date:today,time:new Date().toISOString(),results:{...currentResults}});
+    if(history.length>200)history.length=200;
+    sh(history);data.todayRoll=today;sd(data);
+  }
+
+  isAnimating=false;
 }
 
-// ==================== 叮 ====================
-function playDing(){
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const t=ctx.currentTime;
-    [0,.1].forEach((o,i)=>{
-      const osc=ctx.createOscillator(),gain=ctx.createGain();
-      osc.connect(gain);gain.connect(ctx.destination);
-      osc.type='sine';osc.frequency.value=i===0?784:1047;
-      gain.gain.setValueAtTime(.12,t+o);
-      gain.gain.exponentialRampToValueAtTime(.001,t+o+.25);
-      osc.start(t+o);osc.stop(t+o+.25);
-    });
-  }catch(e){}
-}
+// ==================== Reset (flip all back) ====================
+async function resetAll(){
+  if(isAnimating)return;
+  if(!flipped.qianling&&!flipped.lover&&!flipped.verse)return;
+  isAnimating=true;$reset.disabled=true;
 
-// ==================== 摇一摇 ====================
-let shakeEnabled=false,lastShake=0;
-function requestShake(){
-  if(typeof DeviceMotionEvent!=='undefined'){
-    if(typeof DeviceMotionEvent.requestPermission==='function'){
-      DeviceMotionEvent.requestPermission().then(s=>{if(s==='granted'){shakeEnabled=true;toast('✅ 摇一摇已就绪')}}).catch(()=>{});
-    }else{shakeEnabled=true}
+  // Flip all back
+  for(const cat of['qianling','lover','verse']){
+    if(flipped[cat]){
+      els.inner[cat].classList.add('flipping-back');
+      els.inner[cat].classList.remove('flipped');
+    }
+  }
+  await sleep(500);
+  for(const cat of['qianling','lover','verse']){
+    els.inner[cat].classList.remove('flipping-back');
+    flipped[cat]=false;
+    els.text[cat].textContent='';
+  }
+
+  isAnimating=false;$reset.disabled=false;
+
+  // If all were flipped, pre-pick new results
+  if(!flipped.qianling&&!flipped.lover&&!flipped.verse){
+    // results will be picked on next flip
   }
 }
-function initShake(){
-  let lx,ly,lz;
-  window.addEventListener('devicemotion',e=>{
-    if(!shakeEnabled||isRolling)return;
-    const {x,y,z}=e.accelerationIncludingGravity||{};
-    if(lx===undefined){lx=x;ly=y;lz=z;return}
-    const d=Math.abs(x-lx)+Math.abs(y-ly)+Math.abs(z-lz);
-    if(d>15){const n=Date.now();if(n-lastShake>1500){lastShake=n;roll()}}
-    lx=x;ly=y;lz=z;
-  });
+
+// ==================== Sparkles ====================
+function spawnSparkles(){
+  const colors=['#E8927C','#C4929E','#C4A86C','#D4B87A','#fff','#FFD700'];
+  for(let i=0;i<30;i++){
+    setTimeout(()=>{
+      const s=document.createElement('div');s.className='sparkle';
+      s.style.cssText=`left:${20+Math.random()*60}%;top:${15+Math.random()*70}%;width:${3+Math.random()*6}px;height:${3+Math.random()*6}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:50%;--sx:${(Math.random()-.5)*120}px;--sy:${(Math.random()-.5)*120-40}px`;
+      document.body.appendChild(s);
+      setTimeout(()=>s.remove(),800);
+    },i*15);
+  }
 }
 
-// ==================== 编辑面板 ====================
+// ==================== Sound ====================
+function playClick(){
+  try{const c=new(window.AudioContext||window.webkitAudioContext)(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=660;g.gain.setValueAtTime(.08,t);g.gain.exponentialRampToValueAtTime(.001,t+.08);o.start(t);o.stop(t+.08)}catch(e){}
+}
+function playDing(){
+  try{const c=new(window.AudioContext||window.webkitAudioContext)(),t=c.currentTime;[0,.1].forEach((off,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=i===0?784:1047;g.gain.setValueAtTime(.1,t+off);g.gain.exponentialRampToValueAtTime(.001,t+off+.25);o.start(t+off);o.stop(t+off+.25)})}catch(e){}
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+// ==================== Shake ====================
+let shakeEnabled=false,lastShake=0;
+function reqShake(){
+  if(typeof DeviceMotionEvent!=='undefined'){
+    if(typeof DeviceMotionEvent.requestPermission==='function'){DeviceMotionEvent.requestPermission().then(s=>{if(s==='granted')shakeEnabled=true}).catch(()=>{})}
+    else shakeEnabled=true;
+  }
+}
+(function(){
+  let lx,ly,lz;
+  window.addEventListener('devicemotion',e=>{
+    if(!shakeEnabled||isAnimating)return;
+    const {x,y,z}=e.accelerationIncludingGravity||{};
+    if(lx===undefined){lx=x;ly=y;lz=z;return}
+    if(Math.abs(x-lx)+Math.abs(y-ly)+Math.abs(z-lz)>15){
+      const n=Date.now();if(n-lastShake>1500){lastShake=n;
+        // Flip a random unflipped card
+        const unflipped=Object.entries(flipped).filter(([,v])=>!v&&!locked[k]).map(([k])=>k);
+        if(unflipped.length)flipCard(unflipped[0]);
+      }
+    }lx=x;ly=y;lz=z;
+  });
+})();
+
+// ==================== Card tap ====================
+document.getElementById('cardItemQianling').addEventListener('click',()=>flipCard('qianling'));
+document.getElementById('cardItemLover').addEventListener('click',()=>flipCard('lover'));
+document.getElementById('cardItemVerse').addEventListener('click',()=>flipCard('verse'));
+
+// ==================== Lock handling on flipped card ====================
+// When a card is flipped, tapping the lock dot toggles lock
+for(const cat of['qianling','lover','verse']){
+  els.lockDot[cat].addEventListener('click',e=>{e.stopPropagation();locked[cat]=!locked[cat];updateLockDots();data.locked=locked;sd(data)});
+}
+
+// ==================== Reset button ====================
+$reset.addEventListener('click',resetAll);
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'&&!isAnimating){e.preventDefault();
+    if(flipped.qianling&&flipped.lover&&flipped.verse)resetAll();
+    else{const u=Object.entries(flipped).filter(([,v])=>!v&&!locked[k]).map(([k])=>k);if(u.length)flipCard(u[0])}
+  }
+});
+
+// ==================== Edit Panel ====================
 let panel=null,cat='qianling';
 function openPanel(type){
   if(panel)return;
   const ov=document.createElement('div');ov.className='panel-overlay';
-  const isEdit=type==='edit';
-  ov.innerHTML=isEdit?`
-    <div class="panel"><div class="panel-header"><h3>编辑内容</h3><button class="panel-close" id="pc">✕</button></div>
-    <div class="edit-tabs">
-      <button class="edit-tab active" data-c="qianling">👧 谦灵</button>
-      <button class="edit-tab" data-c="lover">💑 爱人</button>
-      <button class="edit-tab" data-c="verse">🙏 经文</button>
-    </div>
-    <div class="edit-list" id="el"></div>
-    <div class="edit-add"><input id="ei" placeholder="添加新内容..."><button id="ea">添加</button></div></div>
-  `:`
-    <div class="panel"><div class="panel-header"><h3>历史记录</h3><button class="panel-close" id="pc">✕</button></div>
-    <div class="history-list" id="hl"></div></div>
-  `;
+  const ie=type==='edit';
+  ov.innerHTML=ie?`<div class="panel"><div class="panel-header"><h3>编辑内容</h3><button class="panel-close" id="pc">✕</button></div><div class="edit-tabs"><button class="edit-tab active" data-c="qianling">👧 谦灵</button><button class="edit-tab" data-c="lover">💑 爱人</button><button class="edit-tab" data-c="verse">🙏 经文</button></div><div class="edit-list" id="el"></div><div class="edit-add"><input id="ei" placeholder="添加新内容..."><button id="ea">添加</button></div></div>`:`<div class="panel"><div class="panel-header"><h3>历史记录</h3><button class="panel-close" id="pc">✕</button></div><div class="history-list" id="hl"></div></div>`;
   document.body.appendChild(ov);panel={ov,type};
-  if(isEdit){renderEdit();bindEdit(ov)}else{renderHistory();bindHistory(ov)}
+  if(ie){renderEdit();bindEdit(ov)}else{renderHistory()}
   ov.addEventListener('click',e=>{if(e.target===ov)closePanel()});
   ov.querySelector('#pc').addEventListener('click',closePanel);
 }
 function closePanel(){if(!panel)return;panel.ov.remove();panel=null}
-
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function renderEdit(){
   const el=document.getElementById('el');if(!el)return;
   const items=pools[cat];
   el.innerHTML=items.length?items.map((s,i)=>`<div class="edit-item"><span>${esc(s)}</span><button class="edit-item-del" data-i="${i}">✕</button></div>`).join(''):'<div class="empty-state">还没有内容，在下方添加 ✨</div>';
-  el.querySelectorAll('.edit-item-del').forEach(b=>b.addEventListener('click',()=>{
-    const i=parseInt(b.dataset.i);pools[cat].splice(i,1);savePools();renderEdit();
-  }));
+  el.querySelectorAll('.edit-item-del').forEach(b=>b.addEventListener('click',()=>{pools[cat].splice(+b.dataset.i,1);savePools();renderEdit()}));
 }
 function bindEdit(ov){
-  ov.querySelectorAll('.edit-tab').forEach(t=>t.addEventListener('click',()=>{
-    cat=t.dataset.c;ov.querySelectorAll('.edit-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');renderEdit();
-  }));
-  ov.querySelector('#ea').addEventListener('click',addItem);
-  ov.querySelector('#ei').addEventListener('keydown',e=>{if(e.key==='Enter')addItem()});
+  ov.querySelectorAll('.edit-tab').forEach(t=>t.addEventListener('click',()=>{cat=t.dataset.c;ov.querySelectorAll('.edit-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');renderEdit()}));
+  ov.querySelector('#ea').addEventListener('click',()=>{const v=document.getElementById('ei').value.trim();if(v){pools[cat].push(v);savePools();renderEdit();document.getElementById('ei').value=''}document.getElementById('ei').focus()});
+  ov.querySelector('#ei').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=e.target.value.trim();if(v){pools[cat].push(v);savePools();renderEdit();e.target.value=''}}});
 }
-function addItem(){
-  const inp=document.getElementById('ei');if(!inp)return;
-  const v=inp.value.trim();if(!v)return;
-  pools[cat].push(v);savePools();renderEdit();inp.value='';inp.focus();
-}
-function savePools(){
-  data.pools={};
-  for(const c of ['qianling','lover','verse']){if(JSON.stringify(pools[c])!==JSON.stringify(DEFAULT_POOLS[c]))data.pools[c]=pools[c]}
-  saveData(data);
-}
+function savePools(){data.pools={};for(const c of['qianling','lover','verse']){if(JSON.stringify(pools[c])!==JSON.stringify(DEFAULT_POOLS[c]))data.pools[c]=pools[c]}sd(data)}
 function renderHistory(){
   const el=document.getElementById('hl');if(!el)return;
-  if(!history.length){el.innerHTML='<div class="empty-state">还没有摇过 🎲</div>';return}
-  const grps={};history.forEach(h=>{if(!grps[h.date])grps[h.date]=[];grps[h.date].push(h)});
-  el.innerHTML=Object.entries(grps).map(([d,rs])=>`<div class="history-group"><div class="history-date">${fmtDate(d)}</div>${rs.map(r=>`<div class="history-roll"><div class="hi"><span class="hi-icon">👧</span><span>${esc(r.results.qianling)}</span></div><div class="hi"><span class="hi-icon">💑</span><span>${esc(r.results.lover)}</span></div><div class="hi"><span class="hi-icon">🙏</span><span>${esc(r.results.verse)}</span></div></div>`).join('')}</div>`).join('');
+  if(!history.length){el.innerHTML='<div class="empty-state">还没有翻过牌 🎲</div>';return}
+  const g={};history.forEach(h=>{if(!g[h.date])g[h.date]=[];g[h.date].push(h)});
+  el.innerHTML=Object.entries(g).map(([d,rs])=>{const p=d.split('-'),dt=new Date(+p[0],+p[1]-1,+p[2]),ws=['周日','周一','周二','周三','周四','周五','周六'];return`<div class="history-group"><div class="history-date">${+p[1]}月${+p[2]}日 ${ws[dt.getDay()]}</div>${rs.map(r=>`<div class="history-roll"><div class="hi"><span class="hi-icon">👧</span><span>${esc(r.results.qianling)}</span></div><div class="hi"><span class="hi-icon">💑</span><span>${esc(r.results.lover)}</span></div><div class="hi"><span class="hi-icon">🙏</span><span>${esc(r.results.verse)}</span></div></div>`).join('')}</div>`}).join('');
 }
-function bindHistory(ov){/* just close */ }
-function fmtDate(d){
-  const p=d.split('-');const ws=['周日','周一','周二','周三','周四','周五','周六'];
-  const dt=new Date(+p[0],+p[1]-1,+p[2]);
-  return `${+p[1]}月${+p[2]}日 ${ws[dt.getDay()]}`;
-}
-function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function toast(m){
-  const t=document.createElement('div');t.className='toast';t.textContent=m;
-  document.body.appendChild(t);setTimeout(()=>t.remove(),1800);
-}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),1800)}
 
-// ==================== 安装提示 ====================
+document.getElementById('editBtn').addEventListener('click',()=>openPanel('edit'));
+document.getElementById('historyBtn').addEventListener('click',()=>openPanel('history'));
+
+// ==================== Install ====================
 let deferred=null;
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();deferred=e;
-  const b=document.createElement('div');b.className='install-banner';b.id='ib';
-  b.innerHTML=`<span>📲 添加到主屏幕，每天摇一摇</span><button id="ibtn">添加</button><button class="install-close" id="iclose">✕</button>`;
-  document.body.appendChild(b);
-  document.getElementById('ibtn').addEventListener('click',async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null}b.remove()});
-  document.getElementById('iclose').addEventListener('click',()=>b.remove());
-});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;const b=document.createElement('div');b.className='install-banner';b.style.cssText='position:fixed;bottom:72px;left:14px;right:14px;background:rgba(255,255,255,.95);border-radius:14px;padding:12px 16px;box-shadow:0 4px 24px rgba(0,0,0,.3);z-index:50;display:flex;align-items:center;gap:10px;animation:slideUp .35s ease;color:#1E1814;font-family:var(--font-text)';b.innerHTML=`<span style="flex:1;font-size:.8rem">📲 添加到主屏幕</span><button id="ibtn" style="padding:7px 16px;border:none;border-radius:14px;background:#1E1814;color:#fff;font-size:.8rem;cursor:pointer;font-family:var(--font-ui)">添加</button><button id="iclose" style="background:transparent;border:none;color:#999;font-size:1rem;padding:4px 6px;cursor:pointer">✕</button>`;document.body.appendChild(b);document.getElementById('ibtn').addEventListener('click',async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null}b.remove()});document.getElementById('iclose').addEventListener('click',()=>b.remove())});
 
-// ==================== 初始化 ====================
-function initDisplay(){
+// ==================== Init ====================
+(function boot(){
+  // Pre-select today's results silently
   const today=todayKey();
   if(data.todayRoll!==today){
     currentResults.qianling=rand(pools.qianling);
     currentResults.lover=rand(pools.lover);
     currentResults.verse=rand(pools.verse);
-    $q.textContent=currentResults.qianling;$l.textContent=currentResults.lover;$v.textContent=currentResults.verse;
-    history.unshift({date:today,time:new Date().toISOString(),results:{...currentResults}});
-    if(history.length>200)history.length=200;
-    saveHistory(history);data.todayRoll=today;saveData(data);
   }else{
     const te=history.filter(h=>h.date===today);
-    if(te.length){currentResults={...te[0].results}}
-    else{currentResults.qianling=rand(pools.qianling);currentResults.lover=rand(pools.lover);currentResults.verse=rand(pools.verse)}
-    $q.textContent=currentResults.qianling;$l.textContent=currentResults.lover;$v.textContent=currentResults.verse;
+    currentResults=te.length?{...te[0].results}:{qianling:rand(pools.qianling),lover:rand(pools.lover),verse:rand(pools.verse)};
   }
-}
-
-// ==================== 事件 ====================
-$btn.addEventListener('click',roll);
-document.addEventListener('keydown',e=>{if(e.code==='Space'&&!isRolling&&!panel){e.preventDefault();roll()}});
-document.getElementById('editBtn').addEventListener('click',()=>openPanel('edit'));
-document.getElementById('historyBtn').addEventListener('click',()=>openPanel('history'));
-
-function singleRoll(cat,$card,$el,pool){
-  return async function(){
-    if(isRolling||panel||locked[cat])return;
-    isRolling=true;$btn.disabled=true;
-    currentResults[cat]=rand(pool);$card.classList.add('rolling');
-    await animateCard($el,currentResults[cat],pool);
-    $card.classList.remove('rolling');$card.classList.add('settled');
-    setTimeout(()=>$card.classList.remove('settled'),350);
-    playDing();isRolling=false;$btn.disabled=false;
-  };
-}
-$cQ.addEventListener('click',singleRoll('qianling',$cQ,$q,pools.qianling));
-$cL.addEventListener('click',singleRoll('lover',$cL,$l,pools.lover));
-$cV.addEventListener('click',singleRoll('verse',$cV,$v,pools.verse));
-
-// ==================== 启动 ====================
-(function boot(){
-  initDisplay();initShake();requestShake();
+  // Cards stay face-down, user flips them
+  reqShake();
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
 </script>

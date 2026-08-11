@@ -1,14 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#C8927A"/>
-      <stop offset="100%" stop-color="#D4A88C"/>
+      <stop offset="0%" stop-color="#2A2219"/>
+      <stop offset="100%" stop-color="#1E1814"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D4B87A"/>
+      <stop offset="100%" stop-color="#C4A86C"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <circle cx="160" cy="200" r="40" fill="white" opacity="0.85"/>
-  <circle cx="256" cy="140" r="40" fill="white" opacity="0.85"/>
-  <circle cx="352" cy="200" r="40" fill="white" opacity="0.85"/>
-  <circle cx="200" cy="340" r="40" fill="white" opacity="0.85"/>
-  <circle cx="312" cy="340" r="40" fill="white" opacity="0.85"/>
+  <rect x="8" y="8" width="496" height="496" rx="106" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+  <!-- Three cards slightly fanned -->
+  <g transform="translate(256,240)">
+    <rect x="-130" y="-120" width="80" height="112" rx="10" fill="#E8927C" opacity="0.9" transform="rotate(-8)"/>
+    <rect x="-40" y="-130" width="80" height="112" rx="10" fill="#C4A86C" opacity="0.95"/>
+    <rect x="50" y="-120" width="80" height="112" rx="10" fill="#C4929E" opacity="0.9" transform="rotate(8)"/>
+  </g>
 </svg>
