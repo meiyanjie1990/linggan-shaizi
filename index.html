@@ -26,7 +26,7 @@
   --line:rgba(160,130,90,.22);
   --cw:clamp(150px,46vw,185px);
   --ch:clamp(100px,30vw,124px);
-  --dx:clamp(60px,18vw,78px);
+  --dx:clamp(64px,21vw,84px);
 }
 html{height:100%;overflow:hidden}
 body{
@@ -73,7 +73,7 @@ body{
 }
 
 /* ====== Fan of cards ====== */
-.fan{flex:1;position:relative;min-height:300px;margin-top:2px;z-index:1}
+.fan{flex:1;position:relative;min-height:300px;margin-top:2px;z-index:1;touch-action:pan-y}
 
 .card-slot{
   position:absolute;left:50%;top:50%;
@@ -126,7 +126,7 @@ body{
 }
 .front-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1}
 .front-icon svg{width:18px;height:18px}
-.front-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;position:relative;z-index:1}
+.front-body{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:3px;position:relative;z-index:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:3px;padding-bottom:12px}
 .front-label{font-size:.6rem;color:var(--ink-faint);letter-spacing:.14em;font-family:var(--font-title)}
 .front-text{font-size:.72rem;line-height:1.62;font-family:var(--font-text);word-break:break-word;min-height:2.3em;display:flex;align-items:center;color:#46341F}
 .front-actions{display:flex;align-items:center;gap:6px;position:absolute;bottom:9px;right:11px;z-index:2}
@@ -380,7 +380,7 @@ body{
     </div>
   </div>
 
-  <div class="hint">点任意一张牌翻开</div>
+  <div class="hint">左右滑动选牌 · 点牌翻开</div>
 
   <!-- Stats Track -->
   <div class="stats-track">
@@ -628,6 +628,34 @@ function dingSound(){try{const c=new(window.AudioContext||window.webkitAudioCont
 document.getElementById('cardItemQianling').addEventListener('click',()=>flip('qianling'));
 document.getElementById('cardItemLover').addEventListener('click',()=>flip('lover'));
 document.getElementById('cardItemVerse').addEventListener('click',()=>flip('verse'));
+
+// ---- 滑动选牌：左右滑动让下一张牌转到中间 ----
+const fanEl=document.querySelector('.fan');
+const deckOrder=['qianling','lover','verse'];
+function renderDeck(){
+  deckOrder.forEach((cat,i)=>{
+    const el=slots[cat];
+    el.classList.remove('slot-left','slot-mid','slot-right');
+    el.classList.add(['slot-left','slot-mid','slot-right'][i]);
+    el.classList.toggle('has-flipped',flipped[cat]);
+  });
+}
+let swipeX=null,swipeY=null,isSwiping=false;
+fanEl.addEventListener('pointerdown',e=>{swipeX=e.clientX;swipeY=e.clientY;isSwiping=false;});
+fanEl.addEventListener('pointermove',e=>{
+  if(swipeX===null)return;
+  if(Math.abs(e.clientX-swipeX)>14&&Math.abs(e.clientX-swipeX)>Math.abs(e.clientY-swipeY))isSwiping=true;
+});
+fanEl.addEventListener('pointerup',e=>{
+  if(swipeX===null)return;
+  const dx=e.clientX-swipeX;
+  swipeX=null;swipeY=null;
+  const wasSwiping=isSwiping;isSwiping=false;
+  if(!wasSwiping||Math.abs(dx)<36)return;
+  if(dx<0){deckOrder.push(deckOrder.shift())}else{deckOrder.unshift(deckOrder.pop())}
+  renderDeck();clickSound();
+});
+fanEl.addEventListener('pointercancel',()=>{swipeX=null;swipeY=null;isSwiping=false;});
 $reset.addEventListener('click',resetAll);
 let panelActive=false;
 document.addEventListener('keydown',e=>{if(e.code==='Space'&&!animating&&!panelActive){e.preventDefault();if(flipped.qianling&&flipped.lover&&flipped.verse)resetAll();else{const u=Object.entries(flipped).filter(([k,v])=>!v&&!locked[k]).map(([k])=>k);if(u.length)flip(u[0])}}});
