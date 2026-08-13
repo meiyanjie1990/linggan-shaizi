@@ -85,9 +85,9 @@ body{
 .slot-mid{transform:translate(-50%,calc(-50% - 16px)) rotate(0deg);z-index:2}
 .slot-right{transform:translate(calc(-50% + var(--dx)),calc(-50% + 6px)) rotate(8deg)}
 /* Flipped: straighten from the fan and lift */
-.slot-left.has-flipped{transform:translate(calc(-50% - var(--dx)),calc(-50% - 18px)) rotate(0deg);z-index:3}
+.slot-left.has-flipped{transform:translate(calc(-50% - var(--dx)),calc(-50% + 6px)) rotate(-8deg);z-index:1}
 .slot-mid.has-flipped{transform:translate(-50%,calc(-50% - 24px)) rotate(0deg);z-index:4}
-.slot-right.has-flipped{transform:translate(calc(-50% + var(--dx)),calc(-50% - 18px)) rotate(0deg);z-index:3}
+.slot-right.has-flipped{transform:translate(calc(-50% + var(--dx)),calc(-50% + 6px)) rotate(8deg);z-index:1}
 
 .card-item{position:absolute;inset:0;cursor:pointer;perspective:1200px}
 .card-inner{position:relative;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
@@ -625,9 +625,17 @@ function dingSound(){try{const c=new(window.AudioContext||window.webkitAudioCont
 // ==================================================================
 //  Events
 // ==================================================================
-document.getElementById('cardItemQianling').addEventListener('click',()=>flip('qianling'));
-document.getElementById('cardItemLover').addEventListener('click',()=>flip('lover'));
-document.getElementById('cardItemVerse').addEventListener('click',()=>flip('verse'));
+// 点侧牌：先转到中间再翻开；点中间牌：直接翻开
+function tapCard(cat){
+  const idx=deckOrder.indexOf(cat);
+  if(idx===1){flip(cat);return;}
+  if(idx===0){deckOrder.unshift(deckOrder.pop())}else{deckOrder.push(deckOrder.shift())}
+  renderDeck();clickSound();
+  if(!flipped[cat]&&!locked[cat])setTimeout(()=>flip(cat),320);
+}
+document.getElementById('cardItemQianling').addEventListener('click',()=>tapCard('qianling'));
+document.getElementById('cardItemLover').addEventListener('click',()=>tapCard('lover'));
+document.getElementById('cardItemVerse').addEventListener('click',()=>tapCard('verse'));
 
 // ---- 滑动选牌：左右滑动让下一张牌转到中间 ----
 const fanEl=document.querySelector('.fan');
@@ -667,7 +675,7 @@ fanEl.addEventListener('pointerup',e=>{
 fanEl.addEventListener('pointercancel',()=>{swipeX=null;swipeY=null;swipePointer=null;isSwiping=false;});
 $reset.addEventListener('click',resetAll);
 let panelActive=false;
-document.addEventListener('keydown',e=>{if(e.code==='Space'&&!animating&&!panelActive){e.preventDefault();if(flipped.qianling&&flipped.lover&&flipped.verse)resetAll();else{const u=Object.entries(flipped).filter(([k,v])=>!v&&!locked[k]).map(([k])=>k);if(u.length)flip(u[0])}}});
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&!animating&&!panelActive){e.preventDefault();if(flipped.qianling&&flipped.lover&&flipped.verse)resetAll();else{const s=deckOrder.find(k=>!flipped[k]&&!locked[k]);if(s)tapCard(s)}}});
 
 // ==================================================================
 //  Panels
