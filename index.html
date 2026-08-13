@@ -24,9 +24,9 @@
   --paper:#FFFEF8;
   --chip:#F5ECDA;
   --line:rgba(160,130,90,.22);
-  --cw:clamp(150px,46vw,185px);
-  --ch:clamp(100px,30vw,124px);
-  --dx:clamp(64px,21vw,84px);
+  --cw:clamp(170px,56vw,215px);
+  --ch:calc(var(--cw)*1.5);
+  --dx:clamp(56px,18vw,78px);
 }
 html{height:100%;overflow:hidden}
 body{
@@ -73,7 +73,7 @@ body{
 }
 
 /* ====== Fan of cards ====== */
-.fan{flex:1;position:relative;min-height:300px;margin-top:2px;z-index:1;touch-action:pan-y}
+.fan{flex:1;position:relative;min-height:340px;margin-top:2px;z-index:1;touch-action:pan-y}
 
 .card-slot{
   position:absolute;left:50%;top:50%;
@@ -81,9 +81,9 @@ body{
   transition:transform .55s cubic-bezier(.3,1.35,.42,1);
   z-index:1;
 }
-.slot-left{transform:translate(calc(-50% - var(--dx)),calc(-50% + 6px)) rotate(-11deg)}
+.slot-left{transform:translate(calc(-50% - var(--dx)),calc(-50% + 6px)) rotate(-8deg)}
 .slot-mid{transform:translate(-50%,calc(-50% - 16px)) rotate(0deg);z-index:2}
-.slot-right{transform:translate(calc(-50% + var(--dx)),calc(-50% + 6px)) rotate(11deg)}
+.slot-right{transform:translate(calc(-50% + var(--dx)),calc(-50% + 6px)) rotate(8deg)}
 /* Flipped: straighten from the fan and lift */
 .slot-left.has-flipped{transform:translate(calc(-50% - var(--dx)),calc(-50% - 18px)) rotate(0deg);z-index:3}
 .slot-mid.has-flipped{transform:translate(-50%,calc(-50% - 24px)) rotate(0deg);z-index:4}
@@ -98,7 +98,7 @@ body{
 /* ---- CARD BACK ---- */
 .card-back{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
-  box-shadow:0 10px 26px rgba(120,90,50,.28);
+  box-shadow:0 14px 34px rgba(120,90,50,.32);
   border-radius:13px;
   background-image:radial-gradient(circle at 28% 22%,rgba(255,255,255,.16) 0%,transparent 50%);
 }
@@ -110,31 +110,31 @@ body{
   border:1.5px solid rgba(255,255,255,.42);pointer-events:none;z-index:2;
 }
 .card-back-inner{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
-.card-back-icon{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.32);display:flex;align-items:center;justify-content:center}
-.card-back-icon svg{width:22px;height:22px;display:block}
-.card-back-label{font-size:.78rem;letter-spacing:.24em;color:#fff;font-family:var(--font-title);text-shadow:0 1px 4px rgba(120,60,30,.25);padding-left:.24em}
+.card-back-icon{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.32);display:flex;align-items:center;justify-content:center}
+.card-back-icon svg{width:28px;height:28px;display:block}
+.card-back-label{font-size:.92rem;letter-spacing:.24em;color:#fff;font-family:var(--font-title);text-shadow:0 1px 4px rgba(120,60,30,.25);padding-left:.24em}
 
 /* ---- CARD FRONT (paper) ---- */
 .card-front{
   background:var(--paper);transform:rotateY(180deg);
-  box-shadow:0 12px 30px rgba(120,90,50,.3);
-  display:flex;align-items:center;padding:0 13px;gap:10px;
+  box-shadow:0 16px 40px rgba(120,90,50,.32);
+  display:flex;align-items:center;padding:0 16px;gap:12px;
   border:1px solid var(--line);
   background-image:
     radial-gradient(circle at 28% 18%,rgba(255,255,255,.7) 0%,transparent 55%),
     repeating-linear-gradient(0deg,rgba(160,130,90,.028) 0 1px,transparent 1px 3px);
 }
-.front-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1}
-.front-icon svg{width:18px;height:18px}
-.front-body{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:3px;position:relative;z-index:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:3px;padding-bottom:12px}
-.front-label{font-size:.6rem;color:var(--ink-faint);letter-spacing:.14em;font-family:var(--font-title)}
-.front-text{font-size:.72rem;line-height:1.62;font-family:var(--font-text);word-break:break-word;min-height:2.3em;display:flex;align-items:center;color:#46341F}
-.front-actions{display:flex;align-items:center;gap:6px;position:absolute;bottom:9px;right:11px;z-index:2}
+.front-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1}
+.front-icon svg{width:20px;height:20px}
+.front-body{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:6px;position:relative;z-index:1;padding-bottom:18px}
+.front-label{font-size:.64rem;color:var(--ink-faint);letter-spacing:.14em;font-family:var(--font-title)}
+.front-text{font-size:.86rem;line-height:1.72;font-family:var(--font-text);word-break:break-word;display:flex;align-items:center;color:#46341F}
+.front-actions{display:flex;align-items:center;gap:6px;position:absolute;bottom:12px;right:14px;z-index:2}
 
 /* Front buttons */
 .front-btn{
-  padding:4px 10px;border-radius:999px;border:none;
-  background:var(--chip);font-size:.62rem;cursor:pointer;
+  padding:5px 12px;border-radius:999px;border:none;
+  background:var(--chip);font-size:.68rem;cursor:pointer;
   font-family:var(--font-title);color:var(--ink-soft);transition:all .2s;
   display:flex;align-items:center;gap:3px;white-space:nowrap;letter-spacing:.04em;
 }
@@ -632,6 +632,8 @@ document.getElementById('cardItemVerse').addEventListener('click',()=>flip('vers
 // ---- 滑动选牌：左右滑动让下一张牌转到中间 ----
 const fanEl=document.querySelector('.fan');
 const deckOrder=['qianling','lover','verse'];
+let suppressClickUntil=0;
+fanEl.addEventListener('click',e=>{if(Date.now()<suppressClickUntil){e.stopPropagation()}},true);
 function renderDeck(){
   deckOrder.forEach((cat,i)=>{
     const el=slots[cat];
@@ -640,22 +642,29 @@ function renderDeck(){
     el.classList.toggle('has-flipped',flipped[cat]);
   });
 }
-let swipeX=null,swipeY=null,isSwiping=false;
-fanEl.addEventListener('pointerdown',e=>{swipeX=e.clientX;swipeY=e.clientY;isSwiping=false;});
+let swipeX=null,swipeY=null,isSwiping=false,swipePointer=null;
+fanEl.addEventListener('pointerdown',e=>{
+  swipeX=e.clientX;swipeY=e.clientY;isSwiping=false;swipePointer=e.pointerId;
+  try{fanEl.setPointerCapture(e.pointerId)}catch(err){}
+});
 fanEl.addEventListener('pointermove',e=>{
-  if(swipeX===null)return;
-  if(Math.abs(e.clientX-swipeX)>14&&Math.abs(e.clientX-swipeX)>Math.abs(e.clientY-swipeY))isSwiping=true;
+  if(swipeX===null||e.pointerId!==swipePointer)return;
+  if(Math.abs(e.clientX-swipeX)>12&&Math.abs(e.clientX-swipeX)>Math.abs(e.clientY-swipeY)){
+    isSwiping=true;
+    if(e.cancelable)e.preventDefault();
+  }
 });
 fanEl.addEventListener('pointerup',e=>{
-  if(swipeX===null)return;
+  if(swipeX===null||e.pointerId!==swipePointer)return;
   const dx=e.clientX-swipeX;
-  swipeX=null;swipeY=null;
+  swipeX=null;swipeY=null;swipePointer=null;
   const wasSwiping=isSwiping;isSwiping=false;
   if(!wasSwiping||Math.abs(dx)<36)return;
   if(dx<0){deckOrder.push(deckOrder.shift())}else{deckOrder.unshift(deckOrder.pop())}
   renderDeck();clickSound();
+  suppressClickUntil=Date.now()+400;
 });
-fanEl.addEventListener('pointercancel',()=>{swipeX=null;swipeY=null;isSwiping=false;});
+fanEl.addEventListener('pointercancel',()=>{swipeX=null;swipeY=null;swipePointer=null;isSwiping=false;});
 $reset.addEventListener('click',resetAll);
 let panelActive=false;
 document.addEventListener('keydown',e=>{if(e.code==='Space'&&!animating&&!panelActive){e.preventDefault();if(flipped.qianling&&flipped.lover&&flipped.verse)resetAll();else{const u=Object.entries(flipped).filter(([k,v])=>!v&&!locked[k]).map(([k])=>k);if(u.length)flip(u[0])}}});
