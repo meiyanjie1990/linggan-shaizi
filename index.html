@@ -142,8 +142,17 @@ body{
 .front-btn.done-btn{background:#FBE7D8;color:#C05B32}
 .front-btn.done-btn.did{background:#F6D8C4;color:#A55838;opacity:.85}
 .front-btn.mem-btn{background:#EFE7CC;color:#8A6F4E}
-.front-lock{width:7px;height:7px;border-radius:50%;background:#D8C9AC;transition:all .25s;flex-shrink:0}
+.front-lock{width:11px;height:11px;border-radius:50%;background:#D8C9AC;transition:all .25s;flex-shrink:0}
 .front-lock.active{background:#C05B32;box-shadow:0 0 5px rgba(192,91,50,.5)}
+/* 牌背锁标记：被锁住的牌在背面能看到🔒，点一下就能解锁（没有它，锁住的牌永远翻不开） */
+.back-lock{
+  position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;
+  background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.6);
+  font-size:1rem;line-height:1;padding:0;cursor:pointer;z-index:6;
+  display:none;align-items:center;justify-content:center;
+}
+.back-lock.show{display:flex}
+.back-lock:active{transform:scale(.9)}
 
 /* Flip glow */
 .card-glow{
@@ -308,6 +317,7 @@ body{
       <div class="card-item" id="cardItemQianling">
         <div class="card-inner" id="cardInnerQianling">
           <div class="card-face card-back back-qianling" id="backQianling">
+            <button class="back-lock" id="backLockQianling" title="解锁">🔒</button>
             <div class="card-back-inner">
               <div class="card-back-icon"><svg viewBox="0 0 56 56"><defs><radialGradient id="gq5" cx="40%" cy="35%"><stop offset="0%" stop-color="#fff" stop-opacity=".95"/><stop offset="100%" stop-color="#fff" stop-opacity=".4"/></radialGradient></defs><path d="M28 3 L33 19 L50 19 L35 30 L41 47 L28 37 L15 47 L21 30 L6 19 L23 19 Z" fill="url(#gq5)"/></svg></div>
               <span class="card-back-label">和 谦 灵 玩</span>
@@ -333,6 +343,7 @@ body{
       <div class="card-item" id="cardItemLover">
         <div class="card-inner" id="cardInnerLover">
           <div class="card-face card-back back-lover" id="backLover">
+            <button class="back-lock" id="backLockLover" title="解锁">🔒</button>
             <div class="card-back-inner">
               <div class="card-back-icon"><svg viewBox="0 0 56 56"><defs><radialGradient id="gl5" cx="40%" cy="35%"><stop offset="0%" stop-color="#fff" stop-opacity=".95"/><stop offset="100%" stop-color="#fff" stop-opacity=".4"/></radialGradient></defs><path d="M28 49 C15 37 3 26 3 16 C3 7 10 0 19 0 C24 0 28 4 28 9 C28 4 32 0 37 0 C46 0 53 7 53 16 C53 26 41 37 28 49Z" fill="url(#gl5)"/></svg></div>
               <span class="card-back-label">为 爱 人 做</span>
@@ -359,6 +370,7 @@ body{
       <div class="card-item" id="cardItemVerse">
         <div class="card-inner" id="cardInnerVerse">
           <div class="card-face card-back back-verse" id="backVerse">
+            <button class="back-lock" id="backLockVerse" title="解锁">🔒</button>
             <div class="card-back-inner">
               <div class="card-back-icon"><svg viewBox="0 0 56 56"><defs><radialGradient id="gv5" cx="50%" cy="30%"><stop offset="0%" stop-color="#fff" stop-opacity=".95"/><stop offset="100%" stop-color="#fff" stop-opacity=".4"/></radialGradient></defs><path d="M28 49 C35 37 46 26 46 17 C46 7 37 3 28 3 C19 3 10 7 10 17 C10 26 21 37 28 49Z" fill="url(#gv5)"/><circle cx="28" cy="19" r="8" fill="none" stroke="#fff" stroke-width=".8" opacity=".4"/></svg></div>
               <span class="card-back-label">今 日 经 文</span>
@@ -476,6 +488,8 @@ function sd(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 let data=ld(SK,{pools:null,locked:{},todayRoll:null});
 let pools=data.pools?{...DEFAULT_POOLS,...data.pools}:{...DEFAULT_POOLS};
 let locked=data.locked||{qianling:false,lover:false,verse:false};
+// 锁只管当天：新的一天自动全部解锁，避免某天误点的锁把一张牌永久卡死
+if(data.lockedDate!==todayKey()){locked={qianling:false,lover:false,verse:false};data.locked=locked;data.lockedDate=todayKey();sd(SK,data)}
 let history=ld(HK,[]);
 let growthRecords=ld(GK,[]);
 let memorizedVerses=ld(VK,[]);
@@ -511,9 +525,14 @@ function fmtDate(d){const p=d.split('-'),dt=new Date(+p[0],+p[1]-1,+p[2]),ws=['�
 //  Lock
 // ==================================================================
 const lockDots={qianling:document.getElementById('lockDotQianling'),lover:document.getElementById('lockDotLover'),verse:document.getElementById('lockDotVerse')};
-function updLocks(){for(const c of['qianling','lover','verse']){lockDots[c].className='front-lock'+(locked[c]?' active':'')}}
+const backLocks={qianling:document.getElementById('backLockQianling'),lover:document.getElementById('backLockLover'),verse:document.getElementById('backLockVerse')};
+function updLocks(){for(const c of['qianling','lover','verse']){lockDots[c].className='front-lock'+(locked[c]?' active':'');backLocks[c].classList.toggle('show',locked[c])}}
 updLocks();
-for(const c of['qianling','lover','verse']){lockDots[c].addEventListener('click',e=>{e.stopPropagation();locked[c]=!locked[c];updLocks();data.locked=locked;sd(SK,data)})}
+// 正面小锁点：锁住；牌背🔒标记：解锁（被锁住的牌翻不开，只能从背面解锁）
+for(const c of['qianling','lover','verse']){
+  lockDots[c].addEventListener('click',e=>{e.stopPropagation();locked[c]=!locked[c];updLocks();data.locked=locked;sd(SK,data)});
+  backLocks[c].addEventListener('click',e=>{e.stopPropagation();locked[c]=false;updLocks();data.locked=locked;sd(SK,data);toast('已解锁 · 点牌翻开')});
+}
 
 // ==================================================================
 //  Text animation
@@ -628,6 +647,7 @@ function dingSound(){try{const c=new(window.AudioContext||window.webkitAudioCont
 // 点侧牌：先转到中间再翻开；点中间牌：直接翻开
 function tapCard(cat){
   const idx=deckOrder.indexOf(cat);
+  if(locked[cat]){toast('这张牌被锁住了 · 点牌角的 🔒 解锁');return;}
   if(idx===1){flip(cat);return;}
   if(idx===0){deckOrder.unshift(deckOrder.pop())}else{deckOrder.push(deckOrder.shift())}
   renderDeck();clickSound();
