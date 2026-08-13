@@ -1,4 +1,4 @@
-const CACHE = 'linggan-shaizi-v11';
+const CACHE = 'linggan-shaizi-v12';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './fonts/fonts.css'];
 
 self.addEventListener('install', e => {

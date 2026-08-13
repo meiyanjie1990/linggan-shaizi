@@ -1,6 +1,6 @@
 {
-  "name": "家庭灵感骰子",
-  "short_name": "灵感骰子",
+  "name": "家庭灵感卡牌",
+  "short_name": "灵感卡牌",
   "description": "每天翻三张牌——陪谦灵玩、为爱人做、读一句经文。像精致的桌游一样。",
   "start_url": "./index.html",
   "display": "standalone",

@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="fonts/fonts.css">
-<title>家庭灵感骰子</title>
+<title>家庭灵感卡牌</title>
 <style>
 /* ====== Reset ====== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -37,11 +37,19 @@ body{
   -webkit-user-select:none;user-select:none;overflow:hidden;
 }
 
-/* ====== Paper background ====== */
+/* ====== Paper background（暖纸底 + 三色晕染） ====== */
 .paper-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
+    radial-gradient(ellipse 70% 50% at 10% 5%,rgba(240,170,160,.38) 0%,transparent 60%),
+    radial-gradient(ellipse 65% 45% at 92% 12%,rgba(160,200,175,.34) 0%,transparent 60%),
+    radial-gradient(ellipse 80% 55% at 50% 105%,rgba(230,190,120,.36) 0%,transparent 62%),
     radial-gradient(ellipse 90% 60% at 50% 18%,#FBF4E6 0%,#F3E7CE 55%,#EFE3C8 100%);
 }
+.paper-bg::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 90% 70% at 50% 30%,rgba(235,175,150,.25) 0%,transparent 65%);
+  animation:bgBreathe 9s ease-in-out infinite;
+}
+@keyframes bgBreathe{0%,100%{opacity:.45}50%{opacity:1}}
 .paper-bg::after{content:'';position:absolute;inset:0;opacity:.55;pointer-events:none;
   background:
     repeating-linear-gradient(0deg,rgba(160,130,90,.022) 0 1px,transparent 1px 3px),
@@ -75,7 +83,7 @@ body{
 @keyframes twinkle{0%,100%{opacity:.08}50%{opacity:.55}}
 
 /* ====== Header ====== */
-.header{text-align:center;padding:2px 0 0;flex-shrink:0;position:relative;z-index:1}
+.header{text-align:center;padding:14px 0 0;flex-shrink:0;position:relative;z-index:1}
 .header h1{
   font-size:1.15rem;font-weight:400;letter-spacing:.22em;
   color:var(--ink);font-family:var(--font-title);
@@ -316,6 +324,7 @@ body{
 @media (prefers-reduced-motion:reduce){
   .card-inner,.card-slot{transition:none!important}
   .sparkle,.particle,.petal,.glow-dot{animation:none!important;display:none}
+  .paper-bg::before{animation:none!important}
   .panel{animation:none}
   .card-glow{display:none}
 }
@@ -328,7 +337,7 @@ body{
 
 <div class="board">
   <header class="header">
-    <h1>家庭灵感骰子</h1>
+    <h1>家庭灵感卡牌</h1>
     <div class="date" id="dateDisplay"></div>
   </header>
 
@@ -353,6 +362,7 @@ body{
             </div>
             <button class="front-reroll" id="rerollQianling" title="不喜欢就换一张">🔄 换一张</button>
             <div class="front-actions">
+              <button class="front-btn done-btn" id="qianlingDoneBtn" title="今天做到了">✓ 做到了</button>
               <div class="front-lock" id="lockDotQianling"></div>
             </div>
           </div>
@@ -528,7 +538,7 @@ if(!data.freshStart){
 let flipped={qianling:false,lover:false,verse:false};
 let currentResults={qianling:'',lover:'',verse:''};
 let animating=false;
-let todayDone={lover:false,verse:false}; // track if already clicked today
+let todayDone={qianling:false,lover:false,verse:false}; // track if already clicked today
 
 // Stats
 function updateStats(){
@@ -594,12 +604,15 @@ const inners={qianling:document.getElementById('cardInnerQianling'),lover:docume
 const slots={qianling:document.getElementById('slotQianling'),lover:document.getElementById('slotLover'),verse:document.getElementById('slotVerse')};
 const doneBtn=document.getElementById('doneBtn');
 const memorizeBtn=document.getElementById('memorizeBtn');
+const qianlingDoneBtn=document.getElementById('qianlingDoneBtn');
 
 // Check if today's items already done/memorized
 function checkTodayDone(){
   const today=todayKey();
+  todayDone.qianling=growthRecords.some(a=>a.text===currentResults.qianling&&a.date===today);
   todayDone.lover=loverActions.some(a=>a.text===currentResults.lover&&a.date===today);
   todayDone.verse=memorizedVerses.some(v=>v.text===currentResults.verse&&v.date===today);
+  qianlingDoneBtn.className='front-btn done-btn'+(todayDone.qianling?' did':'');
   doneBtn.className='front-btn done-btn'+(todayDone.lover?' did':'');
   memorizeBtn.textContent=todayDone.verse?'📖 已背':'📖 背诵';
   memorizeBtn.style.opacity=todayDone.verse?'0.6':'1';
@@ -613,6 +626,17 @@ doneBtn.addEventListener('click',e=>{
   loverActions.unshift({text:currentResults.lover,date:today,time:new Date().toISOString()});
   sd(AK,loverActions);todayDone.lover=true;
   doneBtn.className='front-btn done-btn did';
+  updateStats();clickSound();
+  toast('✓ 已记录');
+});
+
+qianlingDoneBtn.addEventListener('click',e=>{
+  e.stopPropagation();
+  if(todayDone.qianling||!flipped.qianling)return;
+  const today=todayKey();
+  growthRecords.unshift({text:currentResults.qianling,tag:'done',date:today,time:new Date().toISOString()});
+  sd(GK,growthRecords);todayDone.qianling=true;
+  qianlingDoneBtn.className='front-btn done-btn did';
   updateStats();clickSound();
   toast('✓ 已记录');
 });
@@ -639,6 +663,7 @@ for(const c of['qianling','lover','verse']){
     texts[c].textContent='';
     await animText(texts[c],currentResults[c],pools[c]);
     clickSound();toast('换了一张');
+    if(c==='qianling')todayDone.qianling=false;
     if(c==='lover')todayDone.lover=false;
     if(c==='verse')todayDone.verse=false;
     checkTodayDone();
@@ -673,7 +698,7 @@ async function resetAll(){
   for(const c of['qianling','lover','verse']){if(flipped[c]){inners[c].classList.add('flipping-back');inners[c].classList.remove('flipped');slots[c].classList.remove('has-flipped')}}
   await sleep(500);
   for(const c of['qianling','lover','verse']){inners[c].classList.remove('flipping-back');flipped[c]=false;texts[c].textContent=''}
-  todayDone={lover:false,verse:false};checkTodayDone();
+  todayDone={qianling:false,lover:false,verse:false};checkTodayDone();
   animating=false;$reset.disabled=false;
 }
 
@@ -815,12 +840,12 @@ function addGrowth(){
 function renderGrowthList(){
   const el=document.getElementById('pl');if(!el)return;
   if(!growthRecords.length){el.innerHTML='<div class="empty-state">还没有成长记录 🌱<br>记录谦灵今天有趣的一句话、一个动作</div>';return}
-  const tags={funny:'有趣',surprise:'惊喜',reflect:'反思',milestone:'里程碑'};
+  const tags={funny:'有趣',surprise:'惊喜',reflect:'反思',milestone:'里程碑',done:'做到了'};
   el.innerHTML=growthRecords.map(r=>`<div class="panel-item"><div class="pi-date">${fmtDate(r.date)} <span class="pi-tag ${r.tag}">${tags[r.tag]||r.tag}</span></div><div>${esc(r.text)}</div></div>`).join('');
 }
 function exportGrowth(){
   if(!growthRecords.length){toast('没有可导出的记录');return}
-  const tags={funny:'有趣',surprise:'惊喜',reflect:'反思',milestone:'里程碑'};
+  const tags={funny:'有趣',surprise:'惊喜',reflect:'反思',milestone:'里程碑',done:'做到了'};
   let txt='谦灵成长记录\n'+'='.repeat(30)+'\n\n';
   growthRecords.forEach(r=>{txt+=`${r.date} [${tags[r.tag]||r.tag}]\n${r.text}\n\n`});
   downloadFile('谦灵成长记录.txt',txt);toast('✅ 已导出');
