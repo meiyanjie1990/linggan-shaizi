@@ -92,6 +92,21 @@ body{
   font-size:.68rem;color:var(--ink-faint);margin-top:5px;
   font-family:var(--font-ui);letter-spacing:.06em;
 }
+.qianling-age{
+  font-size:.7rem;color:var(--ink-soft);margin-top:6px;
+  font-family:var(--font-title);letter-spacing:.05em;
+}
+.anniv-row{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:7px;
+}
+.anniv-chip{
+  padding:4px 10px;border-radius:999px;background:var(--chip);
+  font-size:.62rem;color:var(--ink-soft);font-family:var(--font-ui);
+  white-space:nowrap;border:1px solid transparent;
+}
+.anniv-chip.soon{
+  background:rgba(196,160,106,.3);color:var(--ink);border-color:rgba(196,160,106,.45);
+}
 
 /* ====== Fan of cards ====== */
 .fan{flex:1;position:relative;min-height:340px;margin-top:2px;z-index:1;touch-action:pan-y}
@@ -339,6 +354,8 @@ body{
   <header class="header">
     <h1>家庭灵感卡牌</h1>
     <div class="date" id="dateDisplay"></div>
+    <div class="qianling-age" id="qianlingAge"></div>
+    <div class="anniv-row" id="annivRow"></div>
   </header>
 
   <div class="fan">
@@ -561,6 +578,38 @@ function fmtDate(d){const p=d.split('-'),dt=new Date(+p[0],+p[1]-1,+p[2]),ws=['�
 //  Date display
 // ==================================================================
 (function(){const n=new Date();const ws=['周日','周一','周二','周三','周四','周五','周六'];document.getElementById('dateDisplay').textContent=`${n.getFullYear()}年${n.getMonth()+1}月${n.getDate()}日　${ws[n.getDay()]}`})();
+
+// ==================================================================
+//  谦灵几岁了 + 纪念日倒计时
+// ==================================================================
+const QL_BIRTH=new Date(2023,5,22);
+function ageOf(from,to){
+  let y=to.getFullYear()-from.getFullYear();
+  let m=to.getMonth()-from.getMonth();
+  let d=to.getDate()-from.getDate();
+  if(d<0){m--;d+=new Date(to.getFullYear(),to.getMonth(),0).getDate()}
+  if(m<0){y--;m+=12}
+  return {y,m,d};
+}
+(function(){
+  const now=new Date();
+  const a=ageOf(QL_BIRTH,now);
+  document.getElementById('qianlingAge').textContent=`谦灵今天 ${a.y}岁${a.m}个月${a.d}天`;
+  const annivs=[
+    {label:'💛 结婚',month:8,day:21,wedYear:2021},
+    {label:'🎂 谦灵生日',month:6,day:22},
+    {label:'🎂 老帅生日',month:12,day:23}
+  ];
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  document.getElementById('annivRow').innerHTML=annivs.map(a=>{
+    let target=new Date(now.getFullYear(),a.month-1,a.day);
+    if(target<today)target=new Date(now.getFullYear()+1,a.month-1,a.day);
+    const left=Math.round((target-today)/86400000);
+    const label=a.wedYear?a.label+(target.getFullYear()-a.wedYear)+'周年':a.label;
+    const text=left===0?`${label} · 就是今天 🎉`:`${label} · 还有 ${left} 天`;
+    return `<span class="anniv-chip${left<=10?' soon':''}">${text}</span>`;
+  }).join('');
+})();
 
 // ==================================================================
 //  Lock
